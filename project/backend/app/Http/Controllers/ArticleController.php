@@ -9,30 +9,32 @@ use Illuminate\Support\Facades\DB;
 class ArticleController extends Controller
 {
     /**
-     * Display a listing of articles.
-     */
-    public function index(Request $request)
-    {
-        $articles = Article::all();
+ * Display a listing of articles.
+ */
+public function index(Request $request)
+{
+    // ✅ Eager loading des relations pour éviter le N+1
+    $articles = Article::with(['author', 'comments'])->get();
 
-        $articles = $articles->map(function ($article) use ($request) {
-            if ($request->has('performance_test')) {
-                usleep(30000); // 30ms par article pour simuler le coût du N+1
-            }
+    $articles = $articles->map(function ($article) use ($request) {
+        if ($request->has('performance_test')) {
+            usleep(30000); // 30ms par article pour simuler le coût du N+1
+        }
 
-            return [
-                'id' => $article->id,
-                'title' => $article->title,
-                'content' => substr($article->content, 0, 200) . '...',
-                'author' => $article->author->name,
-                'comments_count' => $article->comments->count(),
-                'published_at' => $article->published_at,
-                'created_at' => $article->created_at,
-            ];
-        });
+        return [
+            'id' => $article->id,
+            'title' => $article->title,
+            'content' => substr($article->content, 0, 200) . '...',
+            'author' => $article->author->name,
+            'comments_count' => $article->comments->count(),
+            'published_at' => $article->published_at,
+            'created_at' => $article->created_at,
+        ];
+    });
 
-        return response()->json($articles);
-    }
+    return response()->json($articles);
+}
+
 
     /**
      * Display the specified article.
