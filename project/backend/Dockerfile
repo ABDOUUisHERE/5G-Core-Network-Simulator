@@ -8,9 +8,7 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     zip \
-    unzip \
-    netcat-openbsd \
-    mariadb-client
+    unzip
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -18,22 +16,17 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 # Install PHP extensions
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
-# Increase upload limits
 RUN echo "upload_max_filesize = 2M" > /usr/local/etc/php/conf.d/uploads.ini \
     && echo "post_max_size = 2M" >> /usr/local/etc/php/conf.d/uploads.ini
 
-# Install Composer
+# Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy composer files and install dependencies (initial build)
-COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader
-
 # Copy application files
-COPY . .
+COPY . /var/www/html
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
@@ -52,12 +45,6 @@ RUN echo '<VirtualHost *:80>\n\
     CustomLog ${APACHE_LOG_DIR}/access.log combined\n\
 </VirtualHost>' > /etc/apache2/sites-available/000-default.conf
 
-# Copy entrypoint from CURRENT directory (CORRECT)
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-# Expose port
 EXPOSE 80
 
-# Run entrypoint
-ENTRYPOINT ["/entrypoint.sh"]
+CMD ["apache2-foreground"]
