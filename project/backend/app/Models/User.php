@@ -6,6 +6,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -41,6 +42,23 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * Automatically hash password when setting it
+     * This ensures passwords are ALWAYS hashed, even if developer forgets
+     *
+     * @param string $value
+     * @return void
+     */
+    public function setPasswordAttribute($value)
+    {
+        // Only hash if it's not already hashed
+        if (!str_starts_with($value, '$2y$')) {
+            $this->attributes['password'] = Hash::make($value);
+        } else {
+            $this->attributes['password'] = $value;
+        }
+    }
 
     /**
      * Get the articles for the user.
