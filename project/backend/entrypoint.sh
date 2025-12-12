@@ -3,30 +3,9 @@ set -e
 
 echo "=== Starting Laravel Application ==="
 
-# Option 1: Vérifier la DB avec netcat si disponible
-if command -v nc > /dev/null 2>&1; then
-    echo "Waiting for database connection..."
-    for i in {1..30}; do
-        if nc -z db 3306 2>/dev/null; then
-            echo "Database is ready!"
-            break
-        fi
-        if [ $i -eq 30 ]; then
-            echo "Warning: Database not ready after 30 attempts"
-        fi
-        sleep 2
-    done
-fi
-
-# Option 2: Vérifier la DB avec mysqladmin si netcat n'est pas disponible
-if command -v mysqladmin > /dev/null 2>&1; then
-    echo "Checking database with mysqladmin..."
-    if mysqladmin ping -h db -u root -psecret --silent; then
-        echo "Database connection successful"
-    else
-        echo "Database connection failed, but continuing..."
-    fi
-fi
+# Attendre simplement (sans vérification complexe)
+echo "Waiting for services to be ready..."
+sleep 15
 
 # Vérifier les dépendances Composer
 if [ ! -d "vendor" ] || [ ! -f "vendor/autoload.php" ]; then
