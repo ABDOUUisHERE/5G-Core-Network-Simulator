@@ -63,6 +63,9 @@ class ArticleController extends Controller
 
     /**
      * Search articles.
+     * 
+     * [BUG-001] Recherche insensible aux accents avec collation utf8mb4_general_ci
+     * [SEC-002] Protection contre l'injection SQL avec Eloquent Query Builder
      */
     public function search(Request $request)
     {
@@ -72,22 +75,22 @@ class ArticleController extends Controller
             return response()->json([]);
         }
 
+        // ✅ SOLUTION SÉCURISÉE : Eloquent + paramètres préparés + collation pour accents
+        // whereRaw utilise des paramètres préparés (?) qui empêchent l'injection SQL
+        // La collation utf8mb4_general_ci rend la recherche insensible aux accents
+        $articles = Article::whereRaw('title COLLATE utf8mb4_general_ci LIKE ?', ["%{$query}%"])
+                           ->orWhereRaw('content COLLATE utf8mb4_general_ci LIKE ?', ["%{$query}%"])
+                           ->select('id', 'title', 'content', 'published_at')
+                           ->get();
 
-        $articles = DB::select(
-    "SELECT * FROM articles 
-     WHERE title COLLATE utf8mb4_general_ci LIKE ? 
-     OR content COLLATE utf8mb4_general_ci LIKE ?",
-    ['%' . $query . '%', '%' . $query . '%']
-);
-
-        $results = array_map(function ($article) {
+        $results = $articles->map(function ($article) {
             return [
                 'id' => $article->id,
                 'title' => $article->title,
                 'content' => substr($article->content, 0, 200),
                 'published_at' => $article->published_at,
             ];
-        }, $articles);
+        });
 
         return response()->json($results);
     }
@@ -143,4 +146,3 @@ class ArticleController extends Controller
         return response()->json(['message' => 'Article deleted successfully']);
     }
 }
-
