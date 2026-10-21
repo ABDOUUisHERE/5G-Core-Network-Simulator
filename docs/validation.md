@@ -12,11 +12,11 @@
 
 The following runs passed:
 
-- [Foundation](https://github.com/ABDOUUisHERE/core5g/actions/runs/39599184089)
-- [Registration](https://github.com/ABDOUUisHERE/core5g/actions/runs/39599743000)
-- [Sessions and routing](https://github.com/ABDOUUisHERE/core5g/actions/runs/39600242167)
-- [Complete Compose runtime, four browser widths and measured load](https://github.com/ABDOUUisHERE/core5g/actions/runs/39603433550)
-- [Go quality gate, Compose and real Kind cluster](https://github.com/ABDOUUisHERE/core5g/actions/runs/39603443408)
+- [Foundation](https://github.com/ABDOUUisHERE/5G-Core-Network-Simulator/actions/runs/39599184089)
+- [Registration](https://github.com/ABDOUUisHERE/5G-Core-Network-Simulator/actions/runs/39599743000)
+- [Sessions and routing](https://github.com/ABDOUUisHERE/5G-Core-Network-Simulator/actions/runs/39600242167)
+- [Complete Compose runtime, four browser widths and measured load](https://github.com/ABDOUUisHERE/5G-Core-Network-Simulator/actions/runs/39603433550)
+- [Go quality gate, Compose and real Kind cluster](https://github.com/ABDOUUisHERE/5G-Core-Network-Simulator/actions/runs/39603443408)
 
 Both Compose and Kind passed the six acceptance groups covering CDC T01-T09, including unknown/disabled/bad credentials, duplicate requests, unique IPs, released-session rejection, UPF compensation, registration timeout and a full background scenario. All eleven Kind pods were ready at capture time; stateful services retried startup while PostgreSQL initialized.
 
@@ -24,7 +24,7 @@ The first browser run found an assertion that checked drawer closure before the 
 
 Retained repository evidence: [coverage](evidence/coverage.json), [browser results](evidence/browser-results.json), [Kind pods](evidence/kubernetes-pods.txt), [Kind events](evidence/kubernetes-events.txt), [raw measured workload](evidence/performance-compose.json), and [desktop](evidence/dashboard-desktop.png)/[mobile](evidence/dashboard-mobile.png) captures of the real PostgreSQL-backed run.
 
-Explicit Prometheus, provisioned-Grafana and multi-service-Jaeger assertions passed in both Compose and Kind in [this validation run](https://github.com/ABDOUUisHERE/core5g/actions/runs/39604489154). They verified seven scraped services, eight provisioned Grafana panels and actual traces spanning multiple services. Retained checks: [Compose](evidence/observability-compose.json) and [Kind](evidence/observability-kind.json).
+Explicit Prometheus, provisioned-Grafana and multi-service-Jaeger assertions passed in both Compose and Kind in [this validation run](https://github.com/ABDOUUisHERE/5G-Core-Network-Simulator/actions/runs/39604489154). They verified seven scraped services, eight provisioned Grafana panels and actual traces spanning multiple services. Retained checks: [Compose](evidence/observability-compose.json) and [Kind](evidence/observability-kind.json).
 
 ## First measured workload
 
@@ -54,3 +54,13 @@ Before running the full local stack again, restore sufficient free disk and a he
 - 1000 simultaneous successful registrations.
 - Multi-writer/active-active service safety.
 - Production security or 3GPP conformity (outside scope).
+
+## English-language delivery
+
+The English interface passed the Go, Compose/system and Kind jobs in [this CI run](https://github.com/ABDOUUisHERE/5G-Core-Network-Simulator/actions/runs/39628197279). Browser checks validate the English document language, all five page headings, successful registration, mobile navigation and skip-link behavior at four viewport sizes.
+
+The retained desktop/mobile screenshots and browser report were refreshed from that run's PostgreSQL-backed `system-evidence` artifact. Their [capture provenance](evidence/dashboard-capture.json) records the source commit and artifact rather than presenting them as captures of a different revision.
+
+The supplied French specification has been translated into [English Markdown](specification.md), preserving F01-F05, NF01-NF08 and T01-T10 identifiers. The source PDF remains in the user's Downloads directory and is no longer part of the project tree. The [first-run testing guide](testing.md) covers both full Compose validation and the optional in-memory Windows preview.
+
+The Windows artifact from the same run was also exercised locally: the demo and all six acceptance groups passed with in-memory storage. This preview check does not establish PostgreSQL persistence or local monitoring availability. Docker on this host did not respond during this session; complete PostgreSQL/monitoring checks ran in CI.
