@@ -1,0 +1,30 @@
+{
+  "run": 39603443408,
+  "packages": {
+    "authentication": {
+      "covered_statements": 13,
+      "total_statements": 13,
+      "percent": 100.0
+    },
+    "subscriber": {
+      "covered_statements": 31,
+      "total_statements": 34,
+      "percent": 91.18
+    },
+    "registration": {
+      "covered_statements": 142,
+      "total_statements": 170,
+      "percent": 83.53
+    },
+    "session": {
+      "covered_statements": 126,
+      "total_statements": 143,
+      "percent": 88.11
+    },
+    "routing": {
+      "covered_statements": 124,
+      "total_statements": 144,
+      "percent": 86.11
+    }
+  }
+}

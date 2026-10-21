@@ -4,6 +4,8 @@
 
 Core5G models synthetic UE registration, fictional authentication, PDU sessions and virtual packets across independent gRPC services. It is a learning and engineering demonstration, not a 3GPP-conformant implementation or a production 5G core.
 
+![Core5G dashboard from a real PostgreSQL-backed acceptance run](docs/evidence/dashboard-desktop.png)
+
 ## Stack and scope
 
 Go · gRPC / Protocol Buffers · PostgreSQL · Docker Compose · Prometheus · Grafana · Kubernetes / Kind.
@@ -65,6 +67,8 @@ Database records survive normal shutdown in a named volume. `docker compose down
 
 The five critical business packages are `subscriber`, `authentication`, `registration`, `session` and `routing`. Local Linux Docker runs measured coverage above 80% for each and passed the race detector and `go vet`. Runtime acceptance, browser checks, deployment evidence and performance results are retained by GitHub Actions; see [validation status](docs/validation.md) for the actual completed checks and any limitations.
 
+Compose and Kind acceptance passed. A real CI workload completed 1000 registrations at concurrency 50 with 0 errors and p95 153.04 ms. The target below 100 ms was not met; 1000 simultaneous registrations remain a separate experiment. The [raw report](docs/evidence/performance-compose.json) retains the environment and measured samples.
+
 ```sh
 go test ./... -cover
 go test -race ./...
@@ -75,6 +79,8 @@ npm run test:browser
 ```
 
 On Windows without Go, `powershell -ExecutionPolicy Bypass -File scripts/go.ps1 -Task test` runs Go in Docker. `-Task race`, `vet`, `build`, `tools` and `proto` are also supported.
+
+A Windows binary is retained as the `core5g-windows` CI artifact. For an optional **volatile in-memory preview** without Docker, extract it and run `powershell -ExecutionPolicy Bypass -File scripts/local-lab.ps1 -Binary <path-to-core5g.exe>`. Stop only those preview processes with `scripts/local-lab.ps1 -Stop`. This mode does not start PostgreSQL, Grafana or Jaeger; Compose remains the reference persistent deployment.
 
 ## Read the engineering decisions
 

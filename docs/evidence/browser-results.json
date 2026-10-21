@@ -1,0 +1,9 @@
+{
+  "results": [
+    "desktop: five views, no root overflow, registration dialog, skip link and responsive navigation passed",
+    "tablet: five views, no root overflow, registration dialog, skip link and responsive navigation passed",
+    "mobile: five views, no root overflow, registration dialog, skip link and responsive navigation passed",
+    "small-mobile: five views, no root overflow, registration dialog, skip link and responsive navigation passed"
+  ],
+  "errors": []
+}

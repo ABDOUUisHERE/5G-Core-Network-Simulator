@@ -50,6 +50,7 @@ jobs:
           cache: npm
       - run: docker compose up -d --build --wait --wait-timeout 240
       - run: python3 tests/e2e/acceptance.py
+      - run: python3 tests/e2e/observability.py
       - run: npm ci && npx playwright install --with-deps chromium
       - run: npm run test:browser
       - run: python3 tests/performance/load.py --count 1000 --concurrency 50 --output test-results/performance.json
@@ -81,6 +82,7 @@ jobs:
             kubectl rollout status deployment/$service -n core5g --timeout=240s
           done
       - run: CORE5G_URL=http://127.0.0.1:8086 python3 tests/e2e/acceptance.py
+      - run: python3 tests/e2e/observability.py --profile kind
       - if: always()
         run: |
           mkdir -p test-results

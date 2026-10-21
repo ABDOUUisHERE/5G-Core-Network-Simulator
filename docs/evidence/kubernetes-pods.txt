@@ -1,0 +1,12 @@
+NAME                            READY   STATUS    RESTARTS      AGE   IP            NODE                       NOMINATED NODE   READINESS GATES
+amf-6dc894df7d-gwhv6            1/1     Running   3 (49s ago)   61s   10.244.0.6    core5g-lab-control-plane   <none>           <none>
+ausf-6c85bdd56-b9c6p            1/1     Running   0             61s   10.244.0.12   core5g-lab-control-plane   <none>           <none>
+control-api-55b4c4bbf9-wfn2m    1/1     Running   0             61s   10.244.0.11   core5g-lab-control-plane   <none>           <none>
+gnb-simulator-799cdf777-jv4v9   1/1     Running   0             61s   10.244.0.10   core5g-lab-control-plane   <none>           <none>
+grafana-d6d64bb6c-6ndbn         1/1     Running   0             60s   10.244.0.15   core5g-lab-control-plane   <none>           <none>
+jaeger-74d9f8f6c6-gcm5c         1/1     Running   0             60s   10.244.0.13   core5g-lab-control-plane   <none>           <none>
+postgres-6cc87b4fd4-lh58x       1/1     Running   0             61s   10.244.0.16   core5g-lab-control-plane   <none>           <none>
+prometheus-864496cb45-bqggs     1/1     Running   0             60s   10.244.0.14   core5g-lab-control-plane   <none>           <none>
+smf-7759fbb458-5smtf            1/1     Running   3 (46s ago)   61s   10.244.0.8    core5g-lab-control-plane   <none>           <none>
+udm-d7d6796cd-vtz6s             1/1     Running   3 (49s ago)   61s   10.244.0.5    core5g-lab-control-plane   <none>           <none>
+upf-7d98854764-l5cbc            1/1     Running   3 (49s ago)   61s   10.244.0.9    core5g-lab-control-plane   <none>           <none>

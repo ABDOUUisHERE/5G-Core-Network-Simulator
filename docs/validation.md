@@ -10,7 +10,37 @@
 
 ## GitHub checks
 
-Foundation, registration and session PR CI runs passed. The complete Compose acceptance/browser/load workflow and Kubernetes workflow produce retained artifacts. Their final outcomes and selected evidence are added here after execution; a configured job is not a passing result.
+The following runs passed:
+
+- [Foundation](https://github.com/ABDOUUisHERE/stages-fullstack-challenge/actions/runs/39599184089)
+- [Registration](https://github.com/ABDOUUisHERE/stages-fullstack-challenge/actions/runs/39599743000)
+- [Sessions and routing](https://github.com/ABDOUUisHERE/stages-fullstack-challenge/actions/runs/39600242167)
+- [Complete Compose runtime, four browser widths and measured load](https://github.com/ABDOUUisHERE/stages-fullstack-challenge/actions/runs/39603433550)
+- [Go quality gate, Compose and real Kind cluster](https://github.com/ABDOUUisHERE/stages-fullstack-challenge/actions/runs/39603443408)
+
+Both Compose and Kind passed the six acceptance groups covering CDC T01-T09, including unknown/disabled/bad credentials, duplicate requests, unique IPs, released-session rejection, UPF compensation, registration timeout and a full background scenario. All eleven Kind pods were ready at capture time; stateful services retried startup while PostgreSQL initialized.
+
+The first browser run found an assertion that checked drawer closure before the asynchronous hashchange. The test now waits for the actual transition; all five views passed at 1440, 768, 390 and 320 pixels, with no page errors or horizontal root overflow. The skip-link test also preserves the current route.
+
+Retained repository evidence: [coverage](evidence/coverage.json), [browser results](evidence/browser-results.json), [Kind pods](evidence/kubernetes-pods.txt), [Kind events](evidence/kubernetes-events.txt), [raw measured workload](evidence/performance-compose.json), and [desktop](evidence/dashboard-desktop.png)/[mobile](evidence/dashboard-mobile.png) captures of the real PostgreSQL-backed run.
+
+Explicit Prometheus, provisioned-Grafana and multi-service-Jaeger assertions are added in the final validation pass; their outcome is recorded after that run.
+
+## First measured workload
+
+Environment: Ubuntu 24.04.5 LTS runner, 4 logical x86-64 CPUs, 16,760,336,384 bytes RAM, Docker 28.0.4. The runner reported architecture rather than a CPU model. Monitoring/tracing were enabled. One iteration, 1000 new UE registrations, worker concurrency 50, existing acceptance records retained. The raw report records the clean CI merge SHA and sampled container resources.
+
+| Measurement | Actual result |
+| --- | --- |
+| Successful registrations | 1000 / 1000 |
+| Errors | 0 |
+| p50 | 112.99 ms |
+| p95 | 153.04 ms |
+| p99 | 270.24 ms |
+| Wall time | 2.50 s |
+| Throughput | 400.38 requests/s |
+
+These are client-observed measurements of the entire HTTP/gRPC/PostgreSQL path on one shared CI runner. The p95 target below 100 ms was not met. A workload of 1000 requests at concurrency 50 does not establish 1000 simultaneous registrations; the harness supports that separate experiment. Do not generalize one iteration into a capacity guarantee.
 
 ## Local infrastructure incident
 

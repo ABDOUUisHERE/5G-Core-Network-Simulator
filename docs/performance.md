@@ -19,4 +19,4 @@ Raw reports belong in CI artifacts. Small reviewed summaries and selected raw re
 - The current single-writer lifecycle and service-wide persistence serialization favor correctness over peak parallel throughput. Per-UE locking, indexed request lookup and less broad read transactions are concrete future optimizations.
 - Increase worker concurrency progressively, then test 1000 concurrency explicitly. The harness supports it, but the result must be reported with its failures.
 
-Actual measured results and deployment limitations are recorded in [validation status](validation.md). No fabricated result fills an unexecuted benchmark.
+The first actual run completed 1000/1000 registrations at concurrency 50, with 0 errors, p50 112.99 ms, p95 153.04 ms and p99 270.24 ms. This does not meet the 100-ms p95 target. See [validation status](validation.md) and the [raw CI report](evidence/performance-compose.json) for hardware, commit, workload, resource samples and limitations. No fabricated result fills an unexecuted benchmark.
