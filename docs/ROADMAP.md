@@ -10,7 +10,7 @@ Core5G implements the educational scope of CDC V2.0. The initial delivery is int
 | 4 | feature/control-observability | UE/gNB paths, REST API, dashboard, metrics and fault control | Full Docker E2E scenarios |
 | 5 | test/deployment-validation | Docker, Kind manifests, load report, architecture and demo guide | Reproducible test evidence and honest limitations |
 
-The initial PRs were reviewed as a dependency stack and merged into `main` in order. Future work follows the [contribution workflow](../CONTRIBUTING.md). Registration latency and successful 1000-UE concurrency remain open in [issue #19](https://github.com/ABDOUUisHERE/core5g/issues/19).
+The initial PRs were reviewed as a dependency stack and merged into `main` in order. Future work follows the [contribution workflow](../CONTRIBUTING.md). Registration latency and successful 1000-UE concurrency remain open in [issue #19](https://github.com/ABDOUUisHERE/5G-Core-Network-Simulator/issues/19).
 
 ## Assumptions
 
