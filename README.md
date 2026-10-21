@@ -1,104 +1,26 @@
-# 🚀 Challenge Technique - Développeur Full Stack
+# Core5G
 
-Ce challenge simule une situation réelle que vous rencontrerez en entreprise : **rejoindre une équipe et résoudre des problèmes sur une application existante**.
+**An educational, cloud-native 5G core network simulator in Go.**
 
-Contrairement aux exercices traditionnels où vous créez une application from scratch, ici vous devez :
-- ✅ Comprendre du code existant
-- 🐛 Identifier et corriger des bugs
-- 🔒 Résoudre des failles de sécurité
-- ⚡ Optimiser les performances
-- 🔧 Mettre à jour des dépendances
+Core5G models synthetic UE registration, fictional authentication, PDU sessions and virtual packets across independent gRPC services. It is a learning and engineering demonstration, not a 3GPP-conformant implementation or a production 5G core.
 
-**C'est exactement ce que vous ferez 80% du temps en tant que développeur !**
+## Stack and scope
 
----
+Go · gRPC / Protocol Buffers · PostgreSQL · Docker Compose · Prometheus · Grafana · Kubernetes / Kind.
 
-## 🎯 Objectif
+The [CDC V2.0](docs/cahier-des-charges.pdf) is the functional specification. The previous full-stack challenge is being replaced on dedicated branches; its committed history remains available.
 
-Vous recevez une **plateforme de gestion de blog** fonctionnelle (Laravel + React + MySQL) avec plusieurs problèmes à résoudre.
+## Engineering process
 
-**Mission** : Résoudre au moins **70% des tickets** du backlog pour être invité à l'entretien oral.
+- [Roadmap and assumptions](docs/ROADMAP.md)
+- [Contribution and review workflow](CONTRIBUTING.md)
+- Small feature branches, Conventional Commits, linked issues and stacked pull requests.
+- Tests and benchmark evidence are reported as measured; unfinished work is identified explicitly.
 
----
+## Development
 
-## 📁 Structure du challenge
+Go 1.25 or Docker is required. Run `go test ./...` and `go vet ./...`.
 
-```
-/fullstack-challenge/
-├── README.md                 ← Vous êtes ici
-├── CHALLENGE.md              ← Description détaillée du challenge
-├── TICKETS.md                ← Liste des tickets à résoudre (votre mission)
-└── /project/                 ← Le code source de l'application
-```
+Generate protobuf bindings with `make tools proto`; on Windows, use the equivalent commands in the Makefile through PowerShell, replacing `$(CURDIR)` with `${PWD}`.
 
----
-
-## 🚦 Démarrage rapide
-
-### 1. Lisez la description complète
-👉 **[Consultez CHALLENGE.md](./CHALLENGE.md)** pour comprendre le contexte et les règles
-
-### 2. Consultez les tickets à résoudre
-👉 **[Consultez TICKETS.md](./TICKETS.md)** pour voir la liste des problèmes à corriger
-
-### 3. Forkez le repository (IMPORTANT - à faire en premier !)
-👉 **Forkez** https://github.com/voidagency/stages-fullstack-challenge.git sur votre compte GitHub
-
-Cliquez sur le bouton **"Fork"** en haut à droite du repository GitHub.
-
-> [!IMPORTANT]
-> **Fork privé obligatoire** : Vous devez rendre votre fork privé pour protéger votre travail.
-> Ajoutez ensuite **admin[at]void[dot]fr** comme collaborateur avec les droits de lecture (Settings > Collaborators).
-> 
-> ⚠️ Un fork public entraînera l'annulation de votre candidature.
-
-### 4. Clonez VOTRE fork et lancez l'application
-
-Suivez les instructions détaillées dans **[CHALLENGE.md](./CHALLENGE.md)** section "Instructions de Travail"
-
-### 5. Résolvez les tickets
-- Créez une branche par ticket (`BUG-001`, `SEC-002`, etc.)
-- Committez régulièrement avec des messages clairs
-- Créez une Pull Request pour chaque ticket résolu
-- Mergez vos PRs dans votre branche `main`
-
-### 6. Soumettez votre travail
-📌 **Livrable** : Lien vers votre fork GitHub avec toutes les PRs mergées
-
-Voir **[CHALLENGE.md](./CHALLENGE.md)** pour les détails du workflow Git
-
----
-
-## ⏱️ Durée
-
-**Format flexible** : Prenez le temps nécessaire, vous pouvez travailler en plusieurs sessions.
-
-Temps estimé : **8-10 heures** selon votre niveau.
-
----
-
-## 🆘 Besoin d'aide ?
-
-- 📖 Consultez la documentation officielle (Laravel, React, Docker)
-- 🤖 **Vous pouvez utiliser l'IA** (ChatGPT, Copilot, etc.) - voir CHALLENGE.md
-- 🔍 Google, StackOverflow sont vos amis
-
-## 🎓 Technologies utilisées
-
-- **Backend** : PHP 7.4, Laravel 10
-- **Frontend** : React 18, Vite
-- **Base de données** : MySQL 8
-- **Infrastructure** : Docker, Docker Compose
-
----
-
-## 🤝 Bonne chance !
-
-Ce challenge teste vos compétences réelles de développeur. Montrez-nous votre capacité à :
-- 🔍 Analyser et comprendre du code existant
-- 🐛 Débugger méthodiquement
-- 🛠️ Proposer des solutions robustes
-- 📝 Communiquer clairement vos choix
-
-**Prêt ? Rendez-vous dans [CHALLENGE.md](./CHALLENGE.md) !** 🚀
-
+Implementation status and runnable deployment commands are updated in each feature PR.

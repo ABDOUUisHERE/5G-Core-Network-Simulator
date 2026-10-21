@@ -1,0 +1,23 @@
+name: Core5G quality
+on:
+  push:
+    branches: [main, 'chore/**', 'feature/**', 'test/**']
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - run: test -z "$(gofmt -l $(find . -name '*.go' -not -path './api/gen/*'))"
+      - run: go vet ./...
+      - run: go test -race ./... -coverprofile=coverage.out -count=1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: go-coverage
+          path: coverage.out
