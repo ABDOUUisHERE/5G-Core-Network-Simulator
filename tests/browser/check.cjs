@@ -11,23 +11,27 @@ async function main() {
    const page = await browser.newPage({ viewport: { width, height }, isMobile: width < 700, hasTouch: width < 700 });
    page.on('pageerror', error => errors.push(`${name}: ${error.message}`));
    await page.goto(base, { waitUntil: 'networkidle' });
-   await page.getByText(/services disponibles/, { exact: false }).first().waitFor();
+   assert.equal(await page.locator('html').getAttribute('lang'), 'en');
+   await page.getByText(/services available/, { exact: false }).first().waitFor();
+   const titles = { overview: 'Overview', equipment: 'UE devices', sessions: 'PDU sessions', traffic: 'Virtual traffic', observability: 'Observability' };
    for (const view of ['overview', 'equipment', 'sessions', 'traffic', 'observability']) {
     await page.evaluate(view => { location.hash = view; }, view);
     await page.waitForTimeout(120);
+    assert.equal(await page.locator('h1').textContent(), titles[view]);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
     assert.ok(overflow < 2, `${name}/${view} root overflow ${overflow}`);
     assert.equal(await page.locator('.view:visible').count(), 1);
     await page.screenshot({ path: path.join(out, `${name}-${view}.png`), fullPage: true });
    }
-   await page.getByRole('button', { name: /Enregistrer un UE/ }).click();
+   await page.getByRole('button', { name: /Register a UE/ }).click();
    await page.getByRole('dialog').waitFor();
-   await page.getByLabel('SUPI fictif', { exact: true }).fill('imsi-001010000000002');
-   await page.getByRole('button', { name: /Enregistrer l’équipement/ }).click();
+   await page.getByLabel('Synthetic SUPI', { exact: true }).fill('imsi-001010000000002');
+   await page.getByRole('button', { name: /Register device/ }).click();
    await page.getByRole('dialog').waitFor({ state: 'hidden' });
+   await page.locator('#toast').filter({ hasText: 'Device registered.' }).waitFor();
    if (width < 761) {
-    await page.getByRole('button', { name: 'Afficher la navigation' }).click();
-    await page.locator('nav').getByRole('link', { name: /Équipements UE/ }).click();
+    await page.getByRole('button', { name: 'Show navigation' }).click();
+    await page.locator('nav').getByRole('link', { name: /UE devices/ }).click();
     await page.waitForFunction(() => !document.getElementById('sidebar').classList.contains('open'));
     assert.equal(await page.locator('#sidebar.open').count(), 0);
    }
