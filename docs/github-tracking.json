@@ -49,5 +49,10 @@
       "number": 18,
       "url": "https://github.com/ABDOUUisHERE/stages-fullstack-challenge/pull/18"
     }
+  },
+  "follow_up": {
+    "number": 19,
+    "url": "https://github.com/ABDOUUisHERE/stages-fullstack-challenge/issues/19",
+    "scope": "Profile the unmet p95 target and validate 1000 in-flight registrations"
   }
 }

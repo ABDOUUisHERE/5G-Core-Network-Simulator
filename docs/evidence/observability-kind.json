@@ -1,0 +1,32 @@
+{
+  "run": "https://github.com/ABDOUUisHERE/stages-fullstack-challenge/actions/runs/39604489154",
+  "profile": "kind",
+  "checks": [
+    {
+      "check": "prometheus",
+      "result": {
+        "targets": 7,
+        "registered_ues": 3.0
+      }
+    },
+    {
+      "check": "grafana",
+      "result": {
+        "uid": "core5g-overview",
+        "panels": 8
+      }
+    },
+    {
+      "check": "distributed_trace",
+      "result": {
+        "trace_id": "f1474c0c0d34a5c8f77b3eed0af8e91e",
+        "services": [
+          "control-api",
+          "gnb-simulator",
+          "udm"
+        ],
+        "spans": 4
+      }
+    }
+  ]
+}

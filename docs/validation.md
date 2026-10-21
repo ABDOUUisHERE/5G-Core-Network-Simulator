@@ -24,7 +24,7 @@ The first browser run found an assertion that checked drawer closure before the 
 
 Retained repository evidence: [coverage](evidence/coverage.json), [browser results](evidence/browser-results.json), [Kind pods](evidence/kubernetes-pods.txt), [Kind events](evidence/kubernetes-events.txt), [raw measured workload](evidence/performance-compose.json), and [desktop](evidence/dashboard-desktop.png)/[mobile](evidence/dashboard-mobile.png) captures of the real PostgreSQL-backed run.
 
-Explicit Prometheus, provisioned-Grafana and multi-service-Jaeger assertions are added in the final validation pass; their outcome is recorded after that run.
+Explicit Prometheus, provisioned-Grafana and multi-service-Jaeger assertions passed in both Compose and Kind in [this validation run](https://github.com/ABDOUUisHERE/stages-fullstack-challenge/actions/runs/39604489154). They verified seven scraped services, eight provisioned Grafana panels and actual traces spanning multiple services. Retained checks: [Compose](evidence/observability-compose.json) and [Kind](evidence/observability-kind.json).
 
 ## First measured workload
 
