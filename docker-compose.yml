@@ -1,0 +1,120 @@
+name: core5g
+x-service: &service
+  image: core5g:local
+  restart: unless-stopped
+  init: true
+  healthcheck:
+    test: ['CMD', '/core5g', 'healthcheck']
+    interval: 3s
+    timeout: 4s
+    start_period: 10s
+    retries: 40
+  environment: &common
+    GRPC_ADDR: ':50051'
+    HTTP_ADDR: ':8080'
+    UDM_ADDR: udm:50051
+    AUSF_ADDR: ausf:50051
+    AMF_ADDR: amf:50051
+    SMF_ADDR: smf:50051
+    UPF_ADDR: upf:50051
+    GNB_ADDR: gnb-simulator:50051
+    RPC_TIMEOUT: 2s
+    REQUEST_TIMEOUT: 5s
+    OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
+  depends_on:
+    postgres:
+      condition: service_healthy
+  networks: [lab]
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: core5g
+      POSTGRES_PASSWORD: local-lab-admin
+      POSTGRES_DB: core5g
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U core5g -d core5g']
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    networks: [lab]
+  udm:
+    <<: *service
+    environment:
+      <<: *common
+      SERVICE: udm
+      DATABASE_URL: postgres://core5g_udm:local-lab-udm@postgres:5432/core5g?sslmode=disable
+      SEED_SUBSCRIBERS: '1000'
+  ausf:
+    <<: *service
+    environment:
+      <<: *common
+      SERVICE: ausf
+  amf:
+    <<: *service
+    environment:
+      <<: *common
+      SERVICE: amf
+      DATABASE_URL: postgres://core5g_amf:local-lab-amf@postgres:5432/core5g?sslmode=disable
+  smf:
+    <<: *service
+    environment:
+      <<: *common
+      SERVICE: smf
+      DATABASE_URL: postgres://core5g_smf:local-lab-smf@postgres:5432/core5g?sslmode=disable
+  upf:
+    <<: *service
+    environment:
+      <<: *common
+      SERVICE: upf
+      DATABASE_URL: postgres://core5g_upf:local-lab-upf@postgres:5432/core5g?sslmode=disable
+  gnb-simulator:
+    <<: *service
+    environment:
+      <<: *common
+      SERVICE: gnb-simulator
+  control-api:
+    <<: *service
+    build:
+      context: .
+      dockerfile: deployments/docker/Dockerfile
+    environment:
+      <<: *common
+      SERVICE: control-api
+    ports: ['127.0.0.1:8085:8080']
+  ue-simulator:
+    <<: *service
+    profiles: [tools]
+    restart: 'no'
+    environment:
+      <<: *common
+      SERVICE: ue-simulator
+  prometheus:
+    image: prom/prometheus:v3.2.1
+    command: ['--config.file=/etc/prometheus/prometheus.yml']
+    volumes: ['./deployments/docker/prometheus.yml:/etc/prometheus/prometheus.yml:ro']
+    ports: ['127.0.0.1:9095:9090']
+    networks: [lab]
+  grafana:
+    image: grafana/grafana:11.6.0
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: 'true'
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_SECURITY_ADMIN_PASSWORD: local-lab-grafana
+    volumes:
+      - ./deployments/docker/grafana:/etc/grafana/provisioning:ro
+    ports: ['127.0.0.1:3005:3000']
+    networks: [lab]
+  jaeger:
+    image: jaegertracing/all-in-one:1.66.0
+    environment:
+      COLLECTOR_OTLP_ENABLED: 'true'
+    ports: ['127.0.0.1:16686:16686']
+    networks: [lab]
+networks:
+  lab:
+volumes:
+  postgres-data:
