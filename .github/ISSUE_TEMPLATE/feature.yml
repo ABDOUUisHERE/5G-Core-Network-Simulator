@@ -1,0 +1,20 @@
+name: Feature
+description: A bounded Core5G feature with acceptance criteria
+title: "[Core5G] "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and scope
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria and CDC requirements
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Validation plan

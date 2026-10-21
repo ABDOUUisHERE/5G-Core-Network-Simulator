@@ -1,0 +1,31 @@
+{
+  "repository": "ABDOUUisHERE/stages-fullstack-challenge",
+  "milestone": "https://github.com/ABDOUUisHERE/stages-fullstack-challenge/milestone/1",
+  "issues": {
+    "foundation": {
+      "number": 9,
+      "url": "https://github.com/ABDOUUisHERE/stages-fullstack-challenge/issues/9",
+      "title": "[Core5G] Establish the Go/gRPC foundation and engineering workflow"
+    },
+    "registration": {
+      "number": 10,
+      "url": "https://github.com/ABDOUUisHERE/stages-fullstack-challenge/issues/10",
+      "title": "[Core5G] Implement UDM/AUSF/AMF registration and durable state"
+    },
+    "sessions": {
+      "number": 11,
+      "url": "https://github.com/ABDOUUisHERE/stages-fullstack-challenge/issues/11",
+      "title": "[Core5G] Implement PDU sessions, IPAM and virtual packet traffic"
+    },
+    "observability": {
+      "number": 12,
+      "url": "https://github.com/ABDOUUisHERE/stages-fullstack-challenge/issues/12",
+      "title": "[Core5G] Add simulator control API, dashboard and fault observability"
+    },
+    "validation": {
+      "number": 13,
+      "url": "https://github.com/ABDOUUisHERE/stages-fullstack-challenge/issues/13",
+      "title": "[Core5G] Deliver Compose/Kind deployment, load evidence and career-ready documentation"
+    }
+  }
+}

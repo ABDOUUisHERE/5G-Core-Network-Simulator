@@ -1,0 +1,80 @@
+syntax = "proto3";
+package core5g.core.v1;
+option go_package = "core5g/api/gen/core/v1;corev1";
+
+message Empty {}
+message Subscriber { string supi = 1; string status = 2; string auth_profile = 3; }
+message SubscriberRequest { string supi = 1; }
+message SubscriberList { repeated Subscriber subscribers = 1; }
+message UE {
+  string ue_id = 1; string supi = 2; string gnb_id = 3; string state = 4;
+  string registration_id = 5; string updated_at = 6; string last_error = 7;
+}
+message RegisterUERequest {
+  string request_id = 1; string ue_id = 2; string supi = 3; string gnb_id = 4; string credential = 5;
+}
+message RegisterUEResponse {
+  bool accepted = 1; string registration_id = 2; string state = 3; string reason_code = 4;
+}
+message UERequest { string request_id = 1; string ue_id = 2; }
+message UEList { repeated UE equipments = 1; }
+message AuthenticateRequest { string supi = 1; string credential = 2; }
+message AuthenticateResponse { string reason_code = 1; }
+message Counters {
+  uint64 packets_sent = 1; uint64 packets_received = 2; uint64 packets_lost = 3;
+  uint64 packets_rejected = 4; uint64 bytes_sent = 5; uint64 bytes_received = 6;
+  uint64 bytes_lost = 7; uint64 bytes_rejected = 8;
+}
+message Session {
+  string session_id = 1; string request_id = 2; string ue_id = 3; string ip_address = 4;
+  string state = 5; string created_at = 6; string released_at = 7; string last_error = 8;
+}
+message CreateSessionRequest { string request_id = 1; string ue_id = 2; }
+message SessionRequest { string request_id = 1; string session_id = 2; }
+message SessionList { repeated Session sessions = 1; }
+message SessionFilter { string ue_id = 1; }
+message Route { string session_id = 1; string ip_address = 2; bool active = 3; Counters counters = 4; }
+message Packet {
+  string session_id = 1; string source = 2; string destination = 3; uint32 size = 4;
+  string request_id = 5; string timestamp = 6;
+}
+message PacketResult { bool received = 1; bool lost = 2; double latency_ms = 3; Counters counters = 4; }
+message TrafficConfig { double latency_ms = 1; double jitter_ms = 2; double loss_percent = 3; int64 seed = 4; }
+message StatsRequest { string session_id = 1; }
+message Fault { bool enabled = 1; uint32 delay_ms = 2; }
+message SessionEvent { string ue_id = 1; string session_id = 2; bool active = 3; uint64 revision = 4; }
+
+service UDMService {
+  rpc GetSubscriber(SubscriberRequest) returns (Subscriber);
+  rpc PutSubscriber(Subscriber) returns (Subscriber);
+  rpc ListSubscribers(Empty) returns (SubscriberList);
+}
+service AUSFService { rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse); }
+service AMFService {
+  rpc RegisterUE(RegisterUERequest) returns (RegisterUEResponse);
+  rpc DeregisterUE(UERequest) returns (UE);
+  rpc GetUEState(UERequest) returns (UE);
+  rpc ListUEs(Empty) returns (UEList);
+  rpc CreateSession(CreateSessionRequest) returns (Session);
+  rpc UpdateSession(SessionEvent) returns (Empty);
+}
+service SMFService {
+  rpc CreateSession(CreateSessionRequest) returns (Session);
+  rpc GetSession(SessionRequest) returns (Session);
+  rpc ReleaseSession(SessionRequest) returns (Session);
+  rpc ListSessions(SessionFilter) returns (SessionList);
+}
+service UPFService {
+  rpc InstallRoute(Route) returns (Route);
+  rpc RemoveRoute(SessionRequest) returns (Empty);
+  rpc SendPacket(Packet) returns (PacketResult);
+  rpc GetStats(StatsRequest) returns (Counters);
+  rpc ConfigureTraffic(TrafficConfig) returns (TrafficConfig);
+}
+service GNBService {
+  rpc RegisterUE(RegisterUERequest) returns (RegisterUEResponse);
+  rpc DeregisterUE(UERequest) returns (UE);
+  rpc CreateSession(CreateSessionRequest) returns (Session);
+  rpc SendPacket(Packet) returns (PacketResult);
+}
+service FaultService { rpc SetFault(Fault) returns (Fault); rpc GetFault(Empty) returns (Fault); }
