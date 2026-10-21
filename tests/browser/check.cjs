@@ -28,6 +28,7 @@ async function main() {
    if (width < 761) {
     await page.getByRole('button', { name: 'Afficher la navigation' }).click();
     await page.locator('nav').getByRole('link', { name: /Équipements UE/ }).click();
+    await page.waitForFunction(() => !document.getElementById('sidebar').classList.contains('open'));
     assert.equal(await page.locator('#sidebar.open').count(), 0);
    }
    await page.evaluate(() => { location.hash = 'sessions'; });

@@ -1,7 +1,7 @@
 name: Core5G quality
 on:
   push:
-    branches: [main, 'chore/**', 'feature/**', 'test/**']
+    branches: [main]
   pull_request:
 permissions:
   contents: read
