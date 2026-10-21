@@ -8,6 +8,15 @@ permissions:
 jobs:
   go:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: core5g
+          POSTGRES_PASSWORD: local-lab-admin
+          POSTGRES_DB: core5g
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U core5g" --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -16,7 +25,10 @@ jobs:
           cache: true
       - run: test -z "$(gofmt -l $(find . -name '*.go' -not -path './api/gen/*'))"
       - run: go vet ./...
+      - run: PGPASSWORD=local-lab-admin psql -h localhost -U core5g -d core5g -v ON_ERROR_STOP=1 -f migrations/001_initial.sql
       - run: go test -race ./... -coverprofile=coverage.out -count=1
+        env:
+          CORE5G_TEST_POSTGRES: postgres://core5g:local-lab-admin@localhost:5432/core5g?sslmode=disable
       - uses: actions/upload-artifact@v4
         with:
           name: go-coverage
