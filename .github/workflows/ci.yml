@@ -1,7 +1,7 @@
 name: Core5G quality
 on:
   push:
-    branches: [main, 'chore/**', 'feature/**', 'test/**']
+    branches: [main]
   pull_request:
 permissions:
   contents: read
@@ -29,6 +29,7 @@ jobs:
       - run: go test -race ./... -coverprofile=coverage.out -count=1
         env:
           CORE5G_TEST_POSTGRES: postgres://core5g:local-lab-admin@localhost:5432/core5g?sslmode=disable
+      - run: python3 scripts/check_coverage.py coverage.out
       - uses: actions/upload-artifact@v4
         with:
           name: go-coverage
@@ -61,3 +62,34 @@ jobs:
           path: test-results/
       - if: always()
         run: docker compose down
+  kubernetes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/kubernetes.py --check
+      - run: |
+          curl -fsSL https://kind.sigs.k8s.io/dl/v0.33.0/kind-linux-amd64 -o "$RUNNER_TEMP/kind"
+          chmod +x "$RUNNER_TEMP/kind"
+          export PATH="$RUNNER_TEMP:$PATH"
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+          kind create cluster --name core5g-lab --config deployments/kubernetes/kind-config.yaml --wait 120s
+      - run: docker build -t core5g:local -f deployments/docker/Dockerfile . && kind load docker-image core5g:local --name core5g-lab
+      - run: |
+          kubectl apply -f deployments/kubernetes/core5g.json
+          for service in postgres udm ausf amf smf upf gnb-simulator control-api; do
+            kubectl rollout status deployment/$service -n core5g --timeout=240s
+          done
+      - run: CORE5G_URL=http://127.0.0.1:8086 python3 tests/e2e/acceptance.py
+      - if: always()
+        run: |
+          mkdir -p test-results
+          kubectl get pods -n core5g -o wide > test-results/kubernetes-pods.txt
+          kubectl get events -n core5g --sort-by=.lastTimestamp > test-results/kubernetes-events.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kubernetes-evidence
+          path: test-results/
+      - if: always()
+        run: kind delete cluster --name core5g-lab

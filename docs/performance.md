@@ -1,0 +1,22 @@
+# Performance methodology and limits
+
+CDC targets: 1000 concurrent UE as a load objective, and local registration p95 below 100 ms as a target rather than a guarantee. Neither is assumed from unit-test success.
+
+```sh
+python tests/performance/load.py --count 1000 --concurrency 50 --iterations 3 --output test-results/performance.json
+```
+
+The script executes new registrations through HTTP -> gNB -> AMF -> AUSF -> UDM -> PostgreSQL. It records workload, count, worker concurrency, iterations, successful/all-request p50/p95/p99, error samples, throughput, wall time, CPU/OS/RAM, Docker resources and sampled container CPU/memory. Synthetic subscribers are reused; each UE and request UUID is new. Existing persisted records remain present and are documented as part of the environment.
+
+Raw reports belong in CI artifacts. Small reviewed summaries and selected raw reports can be retained under `docs/evidence`. Each report states its commit and whether the working tree was dirty. Screenshots are evidence of a real run, not a benchmark.
+
+## Interpretation
+
+- 1000 requests at concurrency 50 is not a proof of 1000 simultaneous registrations.
+- Error-inclusive percentiles and success-only percentiles are different; the script reports both.
+- Docker CPU sampling is coarse and contains the monitoring overhead; no isolated per-request CPU claim is made.
+- CI hardware is shared and varies. Record repeated iterations before drawing performance conclusions.
+- The current single-writer lifecycle and service-wide persistence serialization favor correctness over peak parallel throughput. Per-UE locking, indexed request lookup and less broad read transactions are concrete future optimizations.
+- Increase worker concurrency progressively, then test 1000 concurrency explicitly. The harness supports it, but the result must be reported with its failures.
+
+Actual measured results and deployment limitations are recorded in [validation status](validation.md). No fabricated result fills an unexecuted benchmark.

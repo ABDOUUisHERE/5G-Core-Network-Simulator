@@ -23,4 +23,67 @@ Go 1.25 or Docker is required. Run `go test ./...` and `go vet ./...`.
 
 Generate protobuf bindings with `make tools proto`; on Windows, use the equivalent commands in the Makefile through PowerShell, replacing `$(CURDIR)` with `${PWD}`.
 
-Implementation status and runnable deployment commands are updated in each feature PR.
+## Run the lab
+
+Prerequisites: Docker Desktop/Engine with Compose, several GB of free disk, and Python 3 for the demo scripts. The dashboard runs inside the Go executable; Node is only required for optional browser tests.
+
+```sh
+docker compose up --build -d --wait
+python scripts/demo.py
+python tests/e2e/acceptance.py
+```
+
+| Tool | Compose URL | Purpose |
+| --- | --- | --- |
+| Network Lab | http://127.0.0.1:8085 | UE/session lifecycle, scenarios, traffic and faults |
+| Grafana | http://127.0.0.1:3005 | Provisioned Core5G dashboard, anonymous viewer |
+| Prometheus | http://127.0.0.1:9095 | Service metrics and PromQL |
+| Jaeger | http://127.0.0.1:16686 | OpenTelemetry traces across the request path |
+
+One thousand synthetic subscriber profiles (`imsi-001010000000001` through `imsi-001010000001000`) are seeded with the fictional credential `demo-key`. An unknown or disabled subscriber is refused. Database and Grafana passwords in the deployment are explicitly local demonstration values.
+
+```sh
+docker compose run --rm ue-simulator
+python tests/performance/load.py --count 1000 --concurrency 50
+docker compose down
+```
+
+Database records survive normal shutdown in a named volume. `docker compose down -v` is a deliberate destructive reset for this lab only. PostgreSQL init migrations run on a new data volume, not on every restart.
+
+## What is implemented
+
+- Independent AMF, AUSF, UDM, SMF, virtual UPF, gNB, UE and control executables.
+- Canonical UUIDs, synthetic SUPI validation and a fail-closed registration state machine.
+- Idempotent session creation/release, unique active IPs and durable compensation.
+- Packet/byte counters and reproducible latency, jitter and loss.
+- Background scenarios, REST controls, a responsive dashboard and fault injection.
+- Per-service metrics, correlated JSON logs, OTLP tracing and readiness/liveness.
+- Service-specific PostgreSQL schemas and logins; nonroot runtime containers.
+- Unit, PostgreSQL integration, real-stack E2E, browser, load and Kind validation workflows.
+
+## Verification and evidence
+
+The five critical business packages are `subscriber`, `authentication`, `registration`, `session` and `routing`. Local Linux Docker runs measured coverage above 80% for each and passed the race detector and `go vet`. Runtime acceptance, browser checks, deployment evidence and performance results are retained by GitHub Actions; see [validation status](docs/validation.md) for the actual completed checks and any limitations.
+
+```sh
+go test ./... -cover
+go test -race ./...
+go vet ./...
+npm ci
+npx playwright install chromium
+npm run test:browser
+```
+
+On Windows without Go, `powershell -ExecutionPolicy Bypass -File scripts/go.ps1 -Task test` runs Go in Docker. `-Task race`, `vet`, `build`, `tools` and `proto` are also supported.
+
+## Read the engineering decisions
+
+- [Architecture and service boundaries](docs/architecture.md)
+- [API reference](docs/api.md)
+- [Demonstration and failure scenarios](docs/demo.md)
+- [Kind/Kubernetes deployment](docs/kubernetes.md)
+- [Requirements and acceptance matrix](docs/requirements.md)
+- [ADRs](docs/adr/)
+- [Performance methodology](docs/performance.md)
+
+The supported topology has one active instance per stateful service. Distributed active-active orchestration is a future design task; replicas are not increased blindly. The administrative API is for a trusted local lab. No 3GPP compliance or production subscriber security is claimed.
