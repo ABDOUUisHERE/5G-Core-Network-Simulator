@@ -12,10 +12,10 @@ Core5G permet de suivre un terminal depuis son enregistrement jusqu'à la créat
 
 Prérequis : Git, Docker avec Compose, Python 3 et plusieurs Go d'espace disque libre. Docker Desktop doit être démarré sous Windows. Le tableau de bord est embarqué dans le binaire Go ; Node.js sert uniquement aux tests navigateur.
 
-La livraison initiale est organisée en PR successives et n'est pas encore fusionnée dans `main`. Pour récupérer cette version complète :
+La version complète est disponible sur la branche `main` :
 
 ```sh
-git clone --branch docs/core5g-readme https://github.com/ABDOUUisHERE/core5g.git
+git clone https://github.com/ABDOUUisHERE/core5g.git
 cd core5g
 docker compose up --build -d --wait
 python scripts/demo.py
@@ -154,7 +154,7 @@ tests/        Intégration, E2E, navigateur et charge
 docs/         Architecture, ADR, exigences et preuves
 ```
 
-Le travail suit des issues, des branches dédiées, des Conventional Commits et des PR avec validation. Les PR initiales se suivent dans l'ordre **#14 → #15 → #16 → #17 → #18 → #20**, puis celle du présent README. Après fusion d'une PR dans `main`, la suivante doit être reciblée vers `main`. Le [guide de contribution](CONTRIBUTING.md) précise le fonctionnement des revues ; le [suivi GitHub](https://github.com/ABDOUUisHERE/core5g/pulls) fait foi pour l'état des fusions.
+Le travail suit des issues, des branches dédiées, des Conventional Commits et des PR avec validation. Les fonctionnalités livrées sont intégrées dans `main`. Le [guide de contribution](CONTRIBUTING.md) précise le fonctionnement des revues ; le [suivi GitHub](https://github.com/ABDOUUisHERE/core5g/pulls) fait foi pour l'état des fusions.
 
 ## Documentation et limites
 
