@@ -17,7 +17,8 @@ def call(path, payload=None, expected=200):
         with urllib.request.urlopen(req, timeout=12) as response:
             code, result = response.status, json.load(response)
     except urllib.error.HTTPError as error:
-        code, result = error.code, json.load(error)
+        with error:
+            code, result = error.code, json.load(error)
     if code != expected:
         raise AssertionError(f"{path}: expected HTTP {expected}, got {code}: {result}")
     return result
