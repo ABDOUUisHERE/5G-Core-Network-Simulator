@@ -1,0 +1,7 @@
+apiVersion: 1
+providers:
+  - name: Core5G
+    folder: Core5G
+    type: file
+    options:
+      path: /etc/grafana/provisioning/dashboards

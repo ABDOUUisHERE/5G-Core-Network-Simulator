@@ -1,0 +1,6 @@
+global:
+  scrape_interval: 5s
+scrape_configs:
+  - job_name: core5g
+    static_configs:
+      - targets: ['udm:8080', 'ausf:8080', 'amf:8080', 'smf:8080', 'upf:8080', 'gnb-simulator:8080', 'control-api:8080']

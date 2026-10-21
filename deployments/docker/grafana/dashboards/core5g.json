@@ -1,0 +1,13 @@
+{
+ "uid":"core5g-overview","title":"Core5G — Network Lab","schemaVersion":39,"version":1,"refresh":"5s","tags":["core5g"],"time":{"from":"now-15m","to":"now"},
+ "panels":[
+  {"id":1,"type":"stat","title":"Registered UE","datasource":{"type":"prometheus","uid":"core5g-prometheus"},"gridPos":{"x":0,"y":0,"w":6,"h":5},"targets":[{"expr":"core5g_registered_ues","refId":"A"}]},
+  {"id":2,"type":"stat","title":"Active PDU sessions","datasource":{"type":"prometheus","uid":"core5g-prometheus"},"gridPos":{"x":6,"y":0,"w":6,"h":5},"targets":[{"expr":"core5g_active_sessions","refId":"A"}]},
+  {"id":3,"type":"stat","title":"Lost packets","datasource":{"type":"prometheus","uid":"core5g-prometheus"},"gridPos":{"x":12,"y":0,"w":6,"h":5},"targets":[{"expr":"core5g_packets_total{result=\"lost\"}","refId":"A"}]},
+  {"id":4,"type":"stat","title":"Injected faults","datasource":{"type":"prometheus","uid":"core5g-prometheus"},"gridPos":{"x":18,"y":0,"w":6,"h":5},"targets":[{"expr":"sum(core5g_fault_enabled)","refId":"A"}]},
+  {"id":5,"type":"timeseries","title":"RPC p95 latency by service (seconds)","datasource":{"type":"prometheus","uid":"core5g-prometheus"},"gridPos":{"x":0,"y":5,"w":12,"h":8},"targets":[{"expr":"histogram_quantile(0.95, sum by (le,service) (rate(core5g_rpc_duration_seconds_bucket[1m])))","legendFormat":"{{service}}","refId":"A"}]},
+  {"id":6,"type":"timeseries","title":"RPC errors per second","datasource":{"type":"prometheus","uid":"core5g-prometheus"},"gridPos":{"x":12,"y":5,"w":12,"h":8},"targets":[{"expr":"sum by (service,code) (rate(core5g_rpc_requests_total{code!=\"OK\"}[1m]))","legendFormat":"{{service}} {{code}}","refId":"A"}]},
+  {"id":7,"type":"timeseries","title":"Virtual packet outcomes","datasource":{"type":"prometheus","uid":"core5g-prometheus"},"gridPos":{"x":0,"y":13,"w":12,"h":8},"targets":[{"expr":"rate(core5g_packets_total[1m])","legendFormat":"{{result}}","refId":"A"}]},
+  {"id":8,"type":"timeseries","title":"Scrape availability","datasource":{"type":"prometheus","uid":"core5g-prometheus"},"gridPos":{"x":12,"y":13,"w":12,"h":8},"targets":[{"expr":"up{job=\"core5g\"}","legendFormat":"{{instance}}","refId":"A"}]}
+ ]
+}
