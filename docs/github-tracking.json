@@ -1,58 +1,58 @@
 {
-  "repository": "ABDOUUisHERE/core5g",
-  "milestone": "https://github.com/ABDOUUisHERE/core5g/milestone/1",
+  "repository": "ABDOUUisHERE/5G-Core-Network-Simulator",
+  "milestone": "https://github.com/ABDOUUisHERE/5G-Core-Network-Simulator/milestone/1",
   "issues": {
     "foundation": {
       "number": 9,
-      "url": "https://github.com/ABDOUUisHERE/core5g/issues/9",
+      "url": "https://github.com/ABDOUUisHERE/5G-Core-Network-Simulator/issues/9",
       "title": "[Core5G] Establish the Go/gRPC foundation and engineering workflow"
     },
     "registration": {
       "number": 10,
-      "url": "https://github.com/ABDOUUisHERE/core5g/issues/10",
+      "url": "https://github.com/ABDOUUisHERE/5G-Core-Network-Simulator/issues/10",
       "title": "[Core5G] Implement UDM/AUSF/AMF registration and durable state"
     },
     "sessions": {
       "number": 11,
-      "url": "https://github.com/ABDOUUisHERE/core5g/issues/11",
+      "url": "https://github.com/ABDOUUisHERE/5G-Core-Network-Simulator/issues/11",
       "title": "[Core5G] Implement PDU sessions, IPAM and virtual packet traffic"
     },
     "observability": {
       "number": 12,
-      "url": "https://github.com/ABDOUUisHERE/core5g/issues/12",
+      "url": "https://github.com/ABDOUUisHERE/5G-Core-Network-Simulator/issues/12",
       "title": "[Core5G] Add simulator control API, dashboard and fault observability"
     },
     "validation": {
       "number": 13,
-      "url": "https://github.com/ABDOUUisHERE/core5g/issues/13",
+      "url": "https://github.com/ABDOUUisHERE/5G-Core-Network-Simulator/issues/13",
       "title": "[Core5G] Deliver Compose/Kind deployment, load evidence and career-ready documentation"
     }
   },
   "pull_requests": {
     "foundation": {
       "number": 14,
-      "url": "https://github.com/ABDOUUisHERE/core5g/pull/14"
+      "url": "https://github.com/ABDOUUisHERE/5G-Core-Network-Simulator/pull/14"
     },
     "registration": {
       "number": 15,
-      "url": "https://github.com/ABDOUUisHERE/core5g/pull/15"
+      "url": "https://github.com/ABDOUUisHERE/5G-Core-Network-Simulator/pull/15"
     },
     "sessions": {
       "number": 16,
-      "url": "https://github.com/ABDOUUisHERE/core5g/pull/16"
+      "url": "https://github.com/ABDOUUisHERE/5G-Core-Network-Simulator/pull/16"
     },
     "observability": {
       "number": 17,
-      "url": "https://github.com/ABDOUUisHERE/core5g/pull/17"
+      "url": "https://github.com/ABDOUUisHERE/5G-Core-Network-Simulator/pull/17"
     },
     "validation": {
       "number": 18,
-      "url": "https://github.com/ABDOUUisHERE/core5g/pull/18"
+      "url": "https://github.com/ABDOUUisHERE/5G-Core-Network-Simulator/pull/18"
     }
   },
   "follow_up": {
     "number": 19,
-    "url": "https://github.com/ABDOUUisHERE/core5g/issues/19",
+    "url": "https://github.com/ABDOUUisHERE/5G-Core-Network-Simulator/issues/19",
     "scope": "Profile the unmet p95 target and validate 1000 in-flight registrations"
   }
 }

@@ -1,0 +1,12 @@
+{
+  "language": "en",
+  "deployment": "Docker Compose with PostgreSQL",
+  "run": "https://github.com/ABDOUUisHERE/5G-Core-Network-Simulator/actions/runs/39628197279",
+  "source_commit": "57274bcec4fc6ab46a8506da6cc3ada735cdbd82",
+  "artifact_id": 12357807347,
+  "screenshots": {
+    "dashboard-desktop.png": "browser/desktop-overview.png",
+    "dashboard-mobile.png": "browser/mobile-overview.png"
+  },
+  "browser_results": "browser/results.json"
+}

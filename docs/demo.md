@@ -8,11 +8,11 @@ Run `docker compose up --build -d --wait`, then open http://127.0.0.1:8085. The 
 
 Run `python scripts/demo.py` or `docker compose run --rm ue-simulator`. Follow UE -> gNB -> AMF -> AUSF -> UDM for registration, then AMF -> SMF -> UPF for the session. Send a virtual packet, observe counters, release the session twice, and verify packet rejection afterward.
 
-In the dashboard, use **Enregistrer un UE**, then **Équipements -> Session**. Use the **Sessions PDU** controls to send a packet or release a connection.
+In the dashboard, use **Register a UE**, then **UE devices -> Session**. Use the **PDU sessions** controls to send a packet or release a connection.
 
 ## 3. Demonstrate resilience
 
-Register a UE before injecting the fault. In **Observabilité**, inject a UPF failure and attempt a new session. The request fails, the session does not become active, and an IP remains reserved if route cleanup cannot be confirmed. Restore UPF. Within a reconciliation cycle, the cleanup is retried; the failed session releases the reservation.
+Register a UE before injecting the fault. In **Observability**, inject a UPF failure and attempt a new session. The request fails, the session does not become active, and an IP remains reserved if route cleanup cannot be confirmed. Restore UPF. Within a reconciliation cycle, the cleanup is retried; the failed session releases the reservation.
 
 Inject an AUSF delay longer than two seconds, then register a new UE. The request must time out and the UE must return to `DISCONNECTED`. Use the API for the delay:
 

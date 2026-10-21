@@ -26,4 +26,4 @@ The reference deployment uses one active instance of each stateful service. It i
 
 Synthetic profiles are seeded for reproducible demonstrations. Subscriber authentication is fictional and does not secure the administrative API. Bind development ports to loopback and use a trusted environment.
 
-References: [gRPC Go documentation](https://grpc.io/docs/languages/go/), [pgx](https://github.com/jackc/pgx), and the [project specification](cahier-des-charges.pdf).
+References: [gRPC Go documentation](https://grpc.io/docs/languages/go/), [pgx](https://github.com/jackc/pgx), and the [project specification](specification.md).

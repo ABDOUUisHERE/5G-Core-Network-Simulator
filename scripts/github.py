@@ -8,7 +8,7 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-REPOSITORY = "ABDOUUisHERE/core5g"
+REPOSITORY = "ABDOUUisHERE/5G-Core-Network-Simulator"
 
 
 def credentials():

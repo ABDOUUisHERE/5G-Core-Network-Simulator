@@ -15,3 +15,5 @@ Review checks: state transitions, dependency failures, cancellation, idempotency
 For stacked changes, merge the parent into `main`, then retarget the next PR to `main` before merging it. Repeat in dependency order so every delivered change reaches the default branch. The initial Core5G delivery is integrated into `main`.
 
 Only synthetic subscriber identities and demonstration credentials belong in this repository. The control interface is intended for a trusted local lab.
+
+Use English for code identifiers, comments, documentation, interface text, accessible labels, commits and pull requests. Update browser selectors and the demonstration guide whenever interface wording changes.
