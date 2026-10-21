@@ -1,0 +1,173 @@
+{
+  "timestamp_utc": "2026-10-21T12:56:32.496358+00:00",
+  "git_commit": "56e73edd8838f6060d210ac4f0182c174a5d9df2",
+  "working_tree_dirty": false,
+  "target": "http://127.0.0.1:8085",
+  "host": {
+    "os": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+    "cpu": "x86_64",
+    "logical_cpus": 4,
+    "ram_bytes": 16760336384
+  },
+  "docker": {
+    "ServerVersion": "28.0.4",
+    "NCPU": 4,
+    "MemTotal": 16760336384,
+    "OperatingSystem": "Ubuntu 24.04.5 LTS",
+    "KernelVersion": "7.0.0-1017-azure"
+  },
+  "workload": "HTTP control API -> gNB -> AMF -> AUSF -> UDM -> PostgreSQL, synthetic subscribers; new UE UUID per request; persistent pre-existing dataset retained; OTLP/metrics enabled",
+  "warmup": "No explicit warm-up; previous acceptance/demo requests may have warmed the stack.",
+  "iterations": [
+    {
+      "iteration": 1,
+      "requests": 1000,
+      "concurrency": 50,
+      "successes": 1000,
+      "errors": 0,
+      "error_samples": [],
+      "wall_seconds": 2.497598571999987,
+      "throughput_per_second": 400.38459791368155,
+      "success_p50_ms": 112.98741300001325,
+      "success_p95_ms": 153.04303100000993,
+      "success_p99_ms": 270.23744199999555,
+      "all_p50_ms": 112.98741300001325,
+      "all_p95_ms": 153.04303100000993,
+      "all_p99_ms": 270.23744199999555
+    }
+  ],
+  "resource_samples": [
+    {
+      "at": "2026-10-21T12:56:32.455527+00:00",
+      "containers": [
+        {
+          "BlockIO": "0B / 0B",
+          "CPUPerc": "57.45%",
+          "Container": "7b3981b7d319d7ec0083b720d3b9f1723071a68b3bc0d14f357bf68007c29705",
+          "ID": "7b3981b7d319",
+          "MemPerc": "0.08%",
+          "MemUsage": "12.67MiB / 15.61GiB",
+          "Name": "core5g-amf-1",
+          "NetIO": "2.13MB / 3.31MB",
+          "PIDs": "11"
+        },
+        {
+          "BlockIO": "0B / 0B",
+          "CPUPerc": "24.21%",
+          "Container": "a41be80228c48a5a1d1853182b8898b9d8caa689f7304dffbc4cd0eb8e290884",
+          "ID": "a41be80228c4",
+          "MemPerc": "0.05%",
+          "MemUsage": "8.773MiB / 15.61GiB",
+          "Name": "core5g-ausf-1",
+          "NetIO": "622kB / 1.08MB",
+          "PIDs": "11"
+        },
+        {
+          "BlockIO": "77.8kB / 0B",
+          "CPUPerc": "29.19%",
+          "Container": "df764e45fa1b679d34ce7d5d93984d55e0dc13f631cbc33c4b8bf7ee5e147d65",
+          "ID": "df764e45fa1b",
+          "MemPerc": "0.08%",
+          "MemUsage": "13.55MiB / 15.61GiB",
+          "Name": "core5g-control-api-1",
+          "NetIO": "1.05MB / 2.34MB",
+          "PIDs": "11"
+        },
+        {
+          "BlockIO": "4.1kB / 0B",
+          "CPUPerc": "25.21%",
+          "Container": "4340ebe026c0357164e1d00917553d11b7c79974b864d31dca08bd7205d7c324",
+          "ID": "4340ebe026c0",
+          "MemPerc": "0.07%",
+          "MemUsage": "10.55MiB / 15.61GiB",
+          "Name": "core5g-gnb-simulator-1",
+          "NetIO": "753kB / 1.26MB",
+          "PIDs": "11"
+        },
+        {
+          "BlockIO": "0B / 61.2MB",
+          "CPUPerc": "0.18%",
+          "Container": "85399b14d6dd351b4c6fb0cd0c69bbf6f07b5349fa93dad03aa1d3e2cb923ece",
+          "ID": "85399b14d6dd",
+          "MemPerc": "0.49%",
+          "MemUsage": "78.81MiB / 15.61GiB",
+          "Name": "core5g-grafana-1",
+          "NetIO": "13.3MB / 91.6kB",
+          "PIDs": "17"
+        },
+        {
+          "BlockIO": "0B / 0B",
+          "CPUPerc": "5.76%",
+          "Container": "e6239cc475425bdcce8d05263c707e83fd6b7c51af9947285272c395ef7abf9b",
+          "ID": "e6239cc47542",
+          "MemPerc": "0.17%",
+          "MemUsage": "27.24MiB / 15.61GiB",
+          "Name": "core5g-jaeger-1",
+          "NetIO": "2.41MB / 24kB",
+          "PIDs": "10"
+        },
+        {
+          "BlockIO": "6.07MB / 70.4MB",
+          "CPUPerc": "45.08%",
+          "Container": "5cf19a1182d7ab836fe3688c69acc2355770f65f9ec7e5844e2785cabd2d7aa8",
+          "ID": "5cf19a1182d7",
+          "MemPerc": "0.26%",
+          "MemUsage": "42MiB / 15.61GiB",
+          "Name": "core5g-postgres-1",
+          "NetIO": "3.08MB / 2.37MB",
+          "PIDs": "11"
+        },
+        {
+          "BlockIO": "0B / 49.2kB",
+          "CPUPerc": "0.30%",
+          "Container": "642d532b12655b83187c13fcfb7ea20a39f79540aca02b3cd40461482cc391c4",
+          "ID": "642d532b1265",
+          "MemPerc": "0.12%",
+          "MemUsage": "19.4MiB / 15.61GiB",
+          "Name": "core5g-prometheus-1",
+          "NetIO": "197kB / 34.9kB",
+          "PIDs": "9"
+        },
+        {
+          "BlockIO": "4.1kB / 0B",
+          "CPUPerc": "0.62%",
+          "Container": "bcab749f5819d802f2a4c981865806b22cddb59f096f7b1006dda8a466347b1b",
+          "ID": "bcab749f5819",
+          "MemPerc": "0.07%",
+          "MemUsage": "11.03MiB / 15.61GiB",
+          "Name": "core5g-smf-1",
+          "NetIO": "274kB / 297kB",
+          "PIDs": "10"
+        },
+        {
+          "BlockIO": "0B / 0B",
+          "CPUPerc": "24.84%",
+          "Container": "af721737ccb3a332ad0fa4f25a4449a9af0c933c249367a3759036cc18700eb5",
+          "ID": "af721737ccb3",
+          "MemPerc": "0.06%",
+          "MemUsage": "9.062MiB / 15.61GiB",
+          "Name": "core5g-udm-1",
+          "NetIO": "1.01MB / 1.35MB",
+          "PIDs": "11"
+        },
+        {
+          "BlockIO": "0B / 0B",
+          "CPUPerc": "0.36%",
+          "Container": "a55b3446cdb44aa606143608142827eea2106094b0bb03668a83fd0d65ab1e10",
+          "ID": "a55b3446cdb4",
+          "MemPerc": "0.06%",
+          "MemUsage": "10.3MiB / 15.61GiB",
+          "Name": "core5g-upf-1",
+          "NetIO": "206kB / 152kB",
+          "PIDs": "10"
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "Client-observed successful-request and all-request percentiles are reported separately.",
+    "The CDC sub-100-ms p95 is a target, not a guaranteed result.",
+    "CPU values are Docker sampled percentages, not isolated per-request CPU time.",
+    "This run does not prove active-active service scalability."
+  ]
+}

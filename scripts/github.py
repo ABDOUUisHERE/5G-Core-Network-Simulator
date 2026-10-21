@@ -23,7 +23,7 @@ def credentials():
 
 def request(token, method, endpoint, data=None):
     req = urllib.request.Request(
-        f"https://api.github.com/repos/{REPOSITORY}/{endpoint}",
+        f"https://api.github.com/repos/{REPOSITORY}" + ("/" + endpoint if endpoint else ""),
         data=None if data is None else json.dumps(data).encode(), method=method,
         headers={"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json",
                  "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "Core5G-engineering"},
@@ -69,14 +69,68 @@ def pull_request(token, args):
     print(result["html_url"])
 
 
+def ready(token, number):
+    pr = request(token, "GET", f"pulls/{number}")
+    if not pr["draft"]:
+        print(pr["html_url"] + " already ready")
+        return
+    payload = {"query": "mutation($id:ID!){markPullRequestReadyForReview(input:{pullRequestId:$id}){pullRequest{url}}}", "variables": {"id": pr["node_id"]}}
+    req = urllib.request.Request("https://api.github.com/graphql", data=json.dumps(payload).encode(), headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json", "User-Agent": "Core5G-engineering"})
+    with urllib.request.urlopen(req, timeout=30) as response:
+        result = json.load(response)
+    if result.get("errors"):
+        raise RuntimeError(result["errors"][0]["message"])
+    print(result["data"]["markPullRequestReadyForReview"]["pullRequest"]["url"])
+
+
+def download(token, endpoint, target):
+    class NoRedirect(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, *args):
+            return None
+    req = urllib.request.Request(f"https://api.github.com/repos/{REPOSITORY}/{endpoint}", headers={"Authorization": f"Bearer {token}", "User-Agent": "Core5G-evidence"})
+    try:
+        with urllib.request.build_opener(NoRedirect).open(req, timeout=30) as response:
+            data = response.read()
+    except urllib.error.HTTPError as error:
+        if error.code not in (301, 302, 303, 307, 308):
+            raise
+        location = error.headers["Location"]
+        if not location.startswith("https://"):
+            raise RuntimeError("Refusing non-HTTPS artifact redirect")
+        # Signed storage URLs never receive the GitHub credential.
+        with urllib.request.urlopen(location, timeout=60) as response:
+            data = response.read()
+    output = Path(target)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_bytes(data)
+    print(str(output))
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("plan")
+    ready_parser = commands.add_parser("ready")
+    ready_parser.add_argument("number", type=int)
+    artifact = commands.add_parser("artifact")
+    artifact.add_argument("id", type=int)
+    artifact.add_argument("--output", required=True)
+    logs = commands.add_parser("logs")
+    logs.add_argument("id", type=int)
+    logs.add_argument("--output", required=True)
     pr = commands.add_parser("pr")
     for name in ("base", "head", "title", "body-file"):
         pr.add_argument(f"--{name}", required=True)
     pr.add_argument("--draft", action="store_true")
     args = parser.parse_args()
     token = credentials()
-    plan(token) if args.command == "plan" else pull_request(token, args)
+    if args.command == "plan":
+        plan(token)
+    elif args.command == "ready":
+        ready(token, args.number)
+    elif args.command == "artifact":
+        download(token, f"actions/artifacts/{args.id}/zip", args.output)
+    elif args.command == "logs":
+        download(token, f"actions/jobs/{args.id}/logs", args.output)
+    else:
+        pull_request(token, args)

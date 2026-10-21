@@ -1,0 +1,1386 @@
+{
+  "apiVersion": "v1",
+  "kind": "List",
+  "items": [
+    {
+      "apiVersion": "v1",
+      "kind": "Namespace",
+      "metadata": {
+        "name": "core5g"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "ConfigMap",
+      "metadata": {
+        "name": "core5g-config",
+        "namespace": "core5g"
+      },
+      "data": {
+        "GRPC_ADDR": ":50051",
+        "HTTP_ADDR": ":8080",
+        "RPC_TIMEOUT": "2s",
+        "REQUEST_TIMEOUT": "5s",
+        "SEED_SUBSCRIBERS": "1000",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://jaeger:4318",
+        "GRAFANA_URL": "http://127.0.0.1:3006",
+        "PROMETHEUS_URL": "http://127.0.0.1:9096",
+        "JAEGER_URL": "http://127.0.0.1:16687",
+        "UDM_ADDR": "udm:50051",
+        "AUSF_ADDR": "ausf:50051",
+        "AMF_ADDR": "amf:50051",
+        "SMF_ADDR": "smf:50051",
+        "UPF_ADDR": "upf:50051",
+        "GNB_ADDR": "gnb-simulator:50051"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "ConfigMap",
+      "metadata": {
+        "name": "core5g-migrations",
+        "namespace": "core5g"
+      },
+      "data": {
+        "001_initial.sql": "-- Schema ownership is explicit. Credentials below are synthetic local-lab values.\nCREATE ROLE core5g_udm LOGIN PASSWORD 'local-lab-udm';\nCREATE ROLE core5g_amf LOGIN PASSWORD 'local-lab-amf';\nCREATE ROLE core5g_smf LOGIN PASSWORD 'local-lab-smf';\nCREATE ROLE core5g_upf LOGIN PASSWORD 'local-lab-upf';\nCREATE SCHEMA udm AUTHORIZATION core5g_udm;\nCREATE SCHEMA amf AUTHORIZATION core5g_amf;\nCREATE SCHEMA smf AUTHORIZATION core5g_smf;\nCREATE SCHEMA upf AUTHORIZATION core5g_upf;\n\nCREATE TABLE udm.subscribers (\n id TEXT PRIMARY KEY, data JSONB NOT NULL,\n supi VARCHAR(32) GENERATED ALWAYS AS (data->>'supi') STORED UNIQUE NOT NULL,\n status VARCHAR(24) GENERATED ALWAYS AS (data->>'status') STORED NOT NULL CHECK(status IN ('ENABLED','DISABLED')),\n auth_profile VARCHAR(80) GENERATED ALWAYS AS (data->>'auth_profile') STORED NOT NULL,\n CHECK(id=supi)\n);\nCREATE TABLE amf.equipments (\n id TEXT PRIMARY KEY, data JSONB NOT NULL,\n ue_id UUID GENERATED ALWAYS AS ((data->>'ue_id')::uuid) STORED UNIQUE NOT NULL,\n supi VARCHAR(32) GENERATED ALWAYS AS (data->>'supi') STORED NOT NULL,\n state VARCHAR(24) GENERATED ALWAYS AS (data->>'state') STORED NOT NULL CHECK(state IN ('DISCONNECTED','REGISTERING','REGISTERED','SESSION_ACTIVE')),\n CHECK(id=ue_id::text)\n);\nCREATE TABLE amf.registrations (id TEXT PRIMARY KEY, data JSONB NOT NULL);\nCREATE TABLE amf.session_events (id TEXT PRIMARY KEY, data JSONB NOT NULL);\nCREATE TABLE smf.sessions (\n id TEXT PRIMARY KEY, data JSONB NOT NULL,\n session_id UUID GENERATED ALWAYS AS ((data->>'session_id')::uuid) STORED UNIQUE NOT NULL,\n request_id UUID GENERATED ALWAYS AS ((data->>'request_id')::uuid) STORED UNIQUE NOT NULL,\n ue_id UUID GENERATED ALWAYS AS ((data->>'ue_id')::uuid) STORED NOT NULL,\n ip_address INET GENERATED ALWAYS AS (NULLIF(data->>'ip_address','')::inet) STORED,\n state VARCHAR(24) GENERATED ALWAYS AS (data->>'state') STORED NOT NULL CHECK(state IN ('CREATING','ACTIVE','RELEASING','RELEASED','FAILED')),\n CHECK(id=session_id::text)\n);\nCREATE UNIQUE INDEX uq_active_ip ON smf.sessions(ip_address) WHERE state IN ('CREATING','ACTIVE','RELEASING') AND ip_address IS NOT NULL;\nCREATE INDEX session_ue ON smf.sessions(ue_id);\nCREATE TABLE upf.routes (id TEXT PRIMARY KEY, data JSONB NOT NULL);\nCREATE TABLE upf.settings (id TEXT PRIMARY KEY, data JSONB NOT NULL);\nGRANT SELECT,INSERT,UPDATE ON ALL TABLES IN SCHEMA udm TO core5g_udm;\nGRANT SELECT,INSERT,UPDATE ON ALL TABLES IN SCHEMA amf TO core5g_amf;\nGRANT SELECT,INSERT,UPDATE ON ALL TABLES IN SCHEMA smf TO core5g_smf;\nGRANT SELECT,INSERT,UPDATE ON ALL TABLES IN SCHEMA upf TO core5g_upf;\n"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Secret",
+      "metadata": {
+        "name": "core5g-local-lab",
+        "namespace": "core5g"
+      },
+      "type": "Opaque",
+      "stringData": {
+        "postgres-password": "local-lab-admin",
+        "udm-url": "postgres://core5g_udm:local-lab-udm@postgres:5432/core5g?sslmode=disable",
+        "amf-url": "postgres://core5g_amf:local-lab-amf@postgres:5432/core5g?sslmode=disable",
+        "smf-url": "postgres://core5g_smf:local-lab-smf@postgres:5432/core5g?sslmode=disable",
+        "upf-url": "postgres://core5g_upf:local-lab-upf@postgres:5432/core5g?sslmode=disable"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolumeClaim",
+      "metadata": {
+        "name": "postgres-data",
+        "namespace": "core5g"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "2Gi"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": {
+        "name": "postgres",
+        "namespace": "core5g"
+      },
+      "spec": {
+        "replicas": 1,
+        "strategy": {
+          "type": "Recreate"
+        },
+        "selector": {
+          "matchLabels": {
+            "app": "postgres"
+          }
+        },
+        "template": {
+          "metadata": {
+            "labels": {
+              "app": "postgres"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "postgres",
+                "image": "postgres:16-alpine",
+                "env": [
+                  {
+                    "name": "POSTGRES_USER",
+                    "value": "core5g"
+                  },
+                  {
+                    "name": "POSTGRES_DB",
+                    "value": "core5g"
+                  },
+                  {
+                    "name": "POSTGRES_PASSWORD",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "core5g-local-lab",
+                        "key": "postgres-password"
+                      }
+                    }
+                  }
+                ],
+                "ports": [
+                  {
+                    "containerPort": 5432
+                  }
+                ],
+                "readinessProbe": {
+                  "exec": {
+                    "command": [
+                      "pg_isready",
+                      "-U",
+                      "core5g"
+                    ]
+                  },
+                  "periodSeconds": 3
+                },
+                "volumeMounts": [
+                  {
+                    "name": "data",
+                    "mountPath": "/var/lib/postgresql/data"
+                  },
+                  {
+                    "name": "migrations",
+                    "mountPath": "/docker-entrypoint-initdb.d",
+                    "readOnly": true
+                  }
+                ],
+                "resources": {
+                  "requests": {
+                    "cpu": "100m",
+                    "memory": "128Mi"
+                  },
+                  "limits": {
+                    "memory": "512Mi"
+                  }
+                }
+              }
+            ],
+            "volumes": [
+              {
+                "name": "data",
+                "persistentVolumeClaim": {
+                  "claimName": "postgres-data"
+                }
+              },
+              {
+                "name": "migrations",
+                "configMap": {
+                  "name": "core5g-migrations"
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "name": "postgres",
+        "namespace": "core5g"
+      },
+      "spec": {
+        "selector": {
+          "app": "postgres"
+        },
+        "ports": [
+          {
+            "name": "postgres",
+            "port": 5432,
+            "targetPort": 5432
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": {
+        "name": "udm",
+        "namespace": "core5g"
+      },
+      "spec": {
+        "replicas": 1,
+        "strategy": {
+          "type": "Recreate"
+        },
+        "selector": {
+          "matchLabels": {
+            "app": "udm"
+          }
+        },
+        "template": {
+          "metadata": {
+            "labels": {
+              "app": "udm"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "udm",
+                "image": "core5g:local",
+                "imagePullPolicy": "Never",
+                "envFrom": [
+                  {
+                    "configMapRef": {
+                      "name": "core5g-config"
+                    }
+                  }
+                ],
+                "env": [
+                  {
+                    "name": "SERVICE",
+                    "value": "udm"
+                  },
+                  {
+                    "name": "DATABASE_URL",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "core5g-local-lab",
+                        "key": "udm-url"
+                      }
+                    }
+                  }
+                ],
+                "ports": [
+                  {
+                    "containerPort": 8080
+                  },
+                  {
+                    "containerPort": 50051
+                  }
+                ],
+                "securityContext": {
+                  "allowPrivilegeEscalation": false,
+                  "readOnlyRootFilesystem": true,
+                  "runAsNonRoot": true,
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "startupProbe": {
+                  "httpGet": {
+                    "path": "/healthz",
+                    "port": 8080
+                  },
+                  "periodSeconds": 3,
+                  "failureThreshold": 60
+                },
+                "readinessProbe": {
+                  "httpGet": {
+                    "path": "/readyz",
+                    "port": 8080
+                  },
+                  "periodSeconds": 5
+                },
+                "livenessProbe": {
+                  "httpGet": {
+                    "path": "/healthz",
+                    "port": 8080
+                  },
+                  "periodSeconds": 10
+                },
+                "resources": {
+                  "requests": {
+                    "cpu": "50m",
+                    "memory": "48Mi"
+                  },
+                  "limits": {
+                    "cpu": "1",
+                    "memory": "192Mi"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "name": "udm",
+        "namespace": "core5g"
+      },
+      "spec": {
+        "selector": {
+          "app": "udm"
+        },
+        "ports": [
+          {
+            "name": "http",
+            "port": 8080,
+            "targetPort": 8080
+          },
+          {
+            "name": "grpc",
+            "port": 50051,
+            "targetPort": 50051
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": {
+        "name": "ausf",
+        "namespace": "core5g"
+      },
+      "spec": {
+        "replicas": 1,
+        "strategy": {
+          "type": "Recreate"
+        },
+        "selector": {
+          "matchLabels": {
+            "app": "ausf"
+          }
+        },
+        "template": {
+          "metadata": {
+            "labels": {
+              "app": "ausf"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "ausf",
+                "image": "core5g:local",
+                "imagePullPolicy": "Never",
+                "envFrom": [
+                  {
+                    "configMapRef": {
+                      "name": "core5g-config"
+                    }
+                  }
+                ],
+                "env": [
+                  {
+                    "name": "SERVICE",
+                    "value": "ausf"
+                  }
+                ],
+                "ports": [
+                  {
+                    "containerPort": 8080
+                  },
+                  {
+                    "containerPort": 50051
+                  }
+                ],
+                "securityContext": {
+                  "allowPrivilegeEscalation": false,
+                  "readOnlyRootFilesystem": true,
+                  "runAsNonRoot": true,
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "startupProbe": {
+                  "httpGet": {
+                    "path": "/healthz",
+                    "port": 8080
+                  },
+                  "periodSeconds": 3,
+                  "failureThreshold": 60
+                },
+                "readinessProbe": {
+                  "httpGet": {
+                    "path": "/readyz",
+                    "port": 8080
+                  },
+                  "periodSeconds": 5
+                },
+                "livenessProbe": {
+                  "httpGet": {
+                    "path": "/healthz",
+                    "port": 8080
+                  },
+                  "periodSeconds": 10
+                },
+                "resources": {
+                  "requests": {
+                    "cpu": "50m",
+                    "memory": "48Mi"
+                  },
+                  "limits": {
+                    "cpu": "1",
+                    "memory": "192Mi"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "name": "ausf",
+        "namespace": "core5g"
+      },
+      "spec": {
+        "selector": {
+          "app": "ausf"
+        },
+        "ports": [
+          {
+            "name": "http",
+            "port": 8080,
+            "targetPort": 8080
+          },
+          {
+            "name": "grpc",
+            "port": 50051,
+            "targetPort": 50051
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": {
+        "name": "amf",
+        "namespace": "core5g"
+      },
+      "spec": {
+        "replicas": 1,
+        "strategy": {
+          "type": "Recreate"
+        },
+        "selector": {
+          "matchLabels": {
+            "app": "amf"
+          }
+        },
+        "template": {
+          "metadata": {
+            "labels": {
+              "app": "amf"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "amf",
+                "image": "core5g:local",
+                "imagePullPolicy": "Never",
+                "envFrom": [
+                  {
+                    "configMapRef": {
+                      "name": "core5g-config"
+                    }
+                  }
+                ],
+                "env": [
+                  {
+                    "name": "SERVICE",
+                    "value": "amf"
+                  },
+                  {
+                    "name": "DATABASE_URL",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "core5g-local-lab",
+                        "key": "amf-url"
+                      }
+                    }
+                  }
+                ],
+                "ports": [
+                  {
+                    "containerPort": 8080
+                  },
+                  {
+                    "containerPort": 50051
+                  }
+                ],
+                "securityContext": {
+                  "allowPrivilegeEscalation": false,
+                  "readOnlyRootFilesystem": true,
+                  "runAsNonRoot": true,
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "startupProbe": {
+                  "httpGet": {
+                    "path": "/healthz",
+                    "port": 8080
+                  },
+                  "periodSeconds": 3,
+                  "failureThreshold": 60
+                },
+                "readinessProbe": {
+                  "httpGet": {
+                    "path": "/readyz",
+                    "port": 8080
+                  },
+                  "periodSeconds": 5
+                },
+                "livenessProbe": {
+                  "httpGet": {
+                    "path": "/healthz",
+                    "port": 8080
+                  },
+                  "periodSeconds": 10
+                },
+                "resources": {
+                  "requests": {
+                    "cpu": "50m",
+                    "memory": "48Mi"
+                  },
+                  "limits": {
+                    "cpu": "1",
+                    "memory": "192Mi"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "name": "amf",
+        "namespace": "core5g"
+      },
+      "spec": {
+        "selector": {
+          "app": "amf"
+        },
+        "ports": [
+          {
+            "name": "http",
+            "port": 8080,
+            "targetPort": 8080
+          },
+          {
+            "name": "grpc",
+            "port": 50051,
+            "targetPort": 50051
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": {
+        "name": "smf",
+        "namespace": "core5g"
+      },
+      "spec": {
+        "replicas": 1,
+        "strategy": {
+          "type": "Recreate"
+        },
+        "selector": {
+          "matchLabels": {
+            "app": "smf"
+          }
+        },
+        "template": {
+          "metadata": {
+            "labels": {
+              "app": "smf"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "smf",
+                "image": "core5g:local",
+                "imagePullPolicy": "Never",
+                "envFrom": [
+                  {
+                    "configMapRef": {
+                      "name": "core5g-config"
+                    }
+                  }
+                ],
+                "env": [
+                  {
+                    "name": "SERVICE",
+                    "value": "smf"
+                  },
+                  {
+                    "name": "DATABASE_URL",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "core5g-local-lab",
+                        "key": "smf-url"
+                      }
+                    }
+                  }
+                ],
+                "ports": [
+                  {
+                    "containerPort": 8080
+                  },
+                  {
+                    "containerPort": 50051
+                  }
+                ],
+                "securityContext": {
+                  "allowPrivilegeEscalation": false,
+                  "readOnlyRootFilesystem": true,
+                  "runAsNonRoot": true,
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "startupProbe": {
+                  "httpGet": {
+                    "path": "/healthz",
+                    "port": 8080
+                  },
+                  "periodSeconds": 3,
+                  "failureThreshold": 60
+                },
+                "readinessProbe": {
+                  "httpGet": {
+                    "path": "/readyz",
+                    "port": 8080
+                  },
+                  "periodSeconds": 5
+                },
+                "livenessProbe": {
+                  "httpGet": {
+                    "path": "/healthz",
+                    "port": 8080
+                  },
+                  "periodSeconds": 10
+                },
+                "resources": {
+                  "requests": {
+                    "cpu": "50m",
+                    "memory": "48Mi"
+                  },
+                  "limits": {
+                    "cpu": "1",
+                    "memory": "192Mi"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "name": "smf",
+        "namespace": "core5g"
+      },
+      "spec": {
+        "selector": {
+          "app": "smf"
+        },
+        "ports": [
+          {
+            "name": "http",
+            "port": 8080,
+            "targetPort": 8080
+          },
+          {
+            "name": "grpc",
+            "port": 50051,
+            "targetPort": 50051
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": {
+        "name": "upf",
+        "namespace": "core5g"
+      },
+      "spec": {
+        "replicas": 1,
+        "strategy": {
+          "type": "Recreate"
+        },
+        "selector": {
+          "matchLabels": {
+            "app": "upf"
+          }
+        },
+        "template": {
+          "metadata": {
+            "labels": {
+              "app": "upf"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "upf",
+                "image": "core5g:local",
+                "imagePullPolicy": "Never",
+                "envFrom": [
+                  {
+                    "configMapRef": {
+                      "name": "core5g-config"
+                    }
+                  }
+                ],
+                "env": [
+                  {
+                    "name": "SERVICE",
+                    "value": "upf"
+                  },
+                  {
+                    "name": "DATABASE_URL",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "core5g-local-lab",
+                        "key": "upf-url"
+                      }
+                    }
+                  }
+                ],
+                "ports": [
+                  {
+                    "containerPort": 8080
+                  },
+                  {
+                    "containerPort": 50051
+                  }
+                ],
+                "securityContext": {
+                  "allowPrivilegeEscalation": false,
+                  "readOnlyRootFilesystem": true,
+                  "runAsNonRoot": true,
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "startupProbe": {
+                  "httpGet": {
+                    "path": "/healthz",
+                    "port": 8080
+                  },
+                  "periodSeconds": 3,
+                  "failureThreshold": 60
+                },
+                "readinessProbe": {
+                  "httpGet": {
+                    "path": "/readyz",
+                    "port": 8080
+                  },
+                  "periodSeconds": 5
+                },
+                "livenessProbe": {
+                  "httpGet": {
+                    "path": "/healthz",
+                    "port": 8080
+                  },
+                  "periodSeconds": 10
+                },
+                "resources": {
+                  "requests": {
+                    "cpu": "50m",
+                    "memory": "48Mi"
+                  },
+                  "limits": {
+                    "cpu": "1",
+                    "memory": "192Mi"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "name": "upf",
+        "namespace": "core5g"
+      },
+      "spec": {
+        "selector": {
+          "app": "upf"
+        },
+        "ports": [
+          {
+            "name": "http",
+            "port": 8080,
+            "targetPort": 8080
+          },
+          {
+            "name": "grpc",
+            "port": 50051,
+            "targetPort": 50051
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": {
+        "name": "gnb-simulator",
+        "namespace": "core5g"
+      },
+      "spec": {
+        "replicas": 1,
+        "strategy": {
+          "type": "Recreate"
+        },
+        "selector": {
+          "matchLabels": {
+            "app": "gnb-simulator"
+          }
+        },
+        "template": {
+          "metadata": {
+            "labels": {
+              "app": "gnb-simulator"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "gnb-simulator",
+                "image": "core5g:local",
+                "imagePullPolicy": "Never",
+                "envFrom": [
+                  {
+                    "configMapRef": {
+                      "name": "core5g-config"
+                    }
+                  }
+                ],
+                "env": [
+                  {
+                    "name": "SERVICE",
+                    "value": "gnb-simulator"
+                  }
+                ],
+                "ports": [
+                  {
+                    "containerPort": 8080
+                  },
+                  {
+                    "containerPort": 50051
+                  }
+                ],
+                "securityContext": {
+                  "allowPrivilegeEscalation": false,
+                  "readOnlyRootFilesystem": true,
+                  "runAsNonRoot": true,
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "startupProbe": {
+                  "httpGet": {
+                    "path": "/healthz",
+                    "port": 8080
+                  },
+                  "periodSeconds": 3,
+                  "failureThreshold": 60
+                },
+                "readinessProbe": {
+                  "httpGet": {
+                    "path": "/readyz",
+                    "port": 8080
+                  },
+                  "periodSeconds": 5
+                },
+                "livenessProbe": {
+                  "httpGet": {
+                    "path": "/healthz",
+                    "port": 8080
+                  },
+                  "periodSeconds": 10
+                },
+                "resources": {
+                  "requests": {
+                    "cpu": "50m",
+                    "memory": "48Mi"
+                  },
+                  "limits": {
+                    "cpu": "1",
+                    "memory": "192Mi"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "name": "gnb-simulator",
+        "namespace": "core5g"
+      },
+      "spec": {
+        "selector": {
+          "app": "gnb-simulator"
+        },
+        "ports": [
+          {
+            "name": "http",
+            "port": 8080,
+            "targetPort": 8080
+          },
+          {
+            "name": "grpc",
+            "port": 50051,
+            "targetPort": 50051
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": {
+        "name": "control-api",
+        "namespace": "core5g"
+      },
+      "spec": {
+        "replicas": 1,
+        "strategy": {
+          "type": "Recreate"
+        },
+        "selector": {
+          "matchLabels": {
+            "app": "control-api"
+          }
+        },
+        "template": {
+          "metadata": {
+            "labels": {
+              "app": "control-api"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "control-api",
+                "image": "core5g:local",
+                "imagePullPolicy": "Never",
+                "envFrom": [
+                  {
+                    "configMapRef": {
+                      "name": "core5g-config"
+                    }
+                  }
+                ],
+                "env": [
+                  {
+                    "name": "SERVICE",
+                    "value": "control-api"
+                  }
+                ],
+                "ports": [
+                  {
+                    "containerPort": 8080
+                  },
+                  {
+                    "containerPort": 50051
+                  }
+                ],
+                "securityContext": {
+                  "allowPrivilegeEscalation": false,
+                  "readOnlyRootFilesystem": true,
+                  "runAsNonRoot": true,
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "startupProbe": {
+                  "httpGet": {
+                    "path": "/healthz",
+                    "port": 8080
+                  },
+                  "periodSeconds": 3,
+                  "failureThreshold": 60
+                },
+                "readinessProbe": {
+                  "httpGet": {
+                    "path": "/readyz",
+                    "port": 8080
+                  },
+                  "periodSeconds": 5
+                },
+                "livenessProbe": {
+                  "httpGet": {
+                    "path": "/healthz",
+                    "port": 8080
+                  },
+                  "periodSeconds": 10
+                },
+                "resources": {
+                  "requests": {
+                    "cpu": "50m",
+                    "memory": "48Mi"
+                  },
+                  "limits": {
+                    "cpu": "1",
+                    "memory": "192Mi"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "name": "control-api",
+        "namespace": "core5g"
+      },
+      "spec": {
+        "selector": {
+          "app": "control-api"
+        },
+        "ports": [
+          {
+            "name": "http",
+            "port": 8080,
+            "targetPort": 8080,
+            "nodePort": 30085
+          },
+          {
+            "name": "grpc",
+            "port": 50051,
+            "targetPort": 50051
+          }
+        ],
+        "type": "NodePort"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "ConfigMap",
+      "metadata": {
+        "name": "prometheus-config",
+        "namespace": "core5g"
+      },
+      "data": {
+        "prometheus.yml": "global:\n  scrape_interval: 5s\nscrape_configs:\n  - job_name: core5g\n    static_configs:\n      - targets: ['udm:8080', 'ausf:8080', 'amf:8080', 'smf:8080', 'upf:8080', 'gnb-simulator:8080', 'control-api:8080']\n"
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": {
+        "name": "prometheus",
+        "namespace": "core5g"
+      },
+      "spec": {
+        "replicas": 1,
+        "strategy": {
+          "type": "Recreate"
+        },
+        "selector": {
+          "matchLabels": {
+            "app": "prometheus"
+          }
+        },
+        "template": {
+          "metadata": {
+            "labels": {
+              "app": "prometheus"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "prometheus",
+                "image": "prom/prometheus:v3.2.1",
+                "ports": [
+                  {
+                    "containerPort": 9090
+                  }
+                ],
+                "volumeMounts": [
+                  {
+                    "name": "config",
+                    "mountPath": "/etc/prometheus"
+                  }
+                ]
+              }
+            ],
+            "volumes": [
+              {
+                "name": "config",
+                "configMap": {
+                  "name": "prometheus-config"
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "name": "prometheus",
+        "namespace": "core5g"
+      },
+      "spec": {
+        "selector": {
+          "app": "prometheus"
+        },
+        "ports": [
+          {
+            "name": "http",
+            "port": 9090,
+            "targetPort": 9090,
+            "nodePort": 30090
+          }
+        ],
+        "type": "NodePort"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "ConfigMap",
+      "metadata": {
+        "name": "grafana-config",
+        "namespace": "core5g"
+      },
+      "data": {
+        "datasource.yml": "apiVersion: 1\ndatasources:\n  - name: Prometheus\n    uid: core5g-prometheus\n    type: prometheus\n    access: proxy\n    url: http://prometheus:9090\n    isDefault: true\n    editable: false\n",
+        "provider.yml": "apiVersion: 1\nproviders:\n  - name: Core5G\n    folder: Core5G\n    type: file\n    options:\n      path: /etc/grafana/provisioning/dashboards\n",
+        "core5g.json": "{\n \"uid\":\"core5g-overview\",\"title\":\"Core5G \u2014 Network Lab\",\"schemaVersion\":39,\"version\":1,\"refresh\":\"5s\",\"tags\":[\"core5g\"],\"time\":{\"from\":\"now-15m\",\"to\":\"now\"},\n \"panels\":[\n  {\"id\":1,\"type\":\"stat\",\"title\":\"Registered UE\",\"datasource\":{\"type\":\"prometheus\",\"uid\":\"core5g-prometheus\"},\"gridPos\":{\"x\":0,\"y\":0,\"w\":6,\"h\":5},\"targets\":[{\"expr\":\"core5g_registered_ues\",\"refId\":\"A\"}]},\n  {\"id\":2,\"type\":\"stat\",\"title\":\"Active PDU sessions\",\"datasource\":{\"type\":\"prometheus\",\"uid\":\"core5g-prometheus\"},\"gridPos\":{\"x\":6,\"y\":0,\"w\":6,\"h\":5},\"targets\":[{\"expr\":\"core5g_active_sessions\",\"refId\":\"A\"}]},\n  {\"id\":3,\"type\":\"stat\",\"title\":\"Lost packets\",\"datasource\":{\"type\":\"prometheus\",\"uid\":\"core5g-prometheus\"},\"gridPos\":{\"x\":12,\"y\":0,\"w\":6,\"h\":5},\"targets\":[{\"expr\":\"core5g_packets_total{result=\\\"lost\\\"}\",\"refId\":\"A\"}]},\n  {\"id\":4,\"type\":\"stat\",\"title\":\"Injected faults\",\"datasource\":{\"type\":\"prometheus\",\"uid\":\"core5g-prometheus\"},\"gridPos\":{\"x\":18,\"y\":0,\"w\":6,\"h\":5},\"targets\":[{\"expr\":\"sum(core5g_fault_enabled)\",\"refId\":\"A\"}]},\n  {\"id\":5,\"type\":\"timeseries\",\"title\":\"RPC p95 latency by service (seconds)\",\"datasource\":{\"type\":\"prometheus\",\"uid\":\"core5g-prometheus\"},\"gridPos\":{\"x\":0,\"y\":5,\"w\":12,\"h\":8},\"targets\":[{\"expr\":\"histogram_quantile(0.95, sum by (le,service) (rate(core5g_rpc_duration_seconds_bucket[1m])))\",\"legendFormat\":\"{{service}}\",\"refId\":\"A\"}]},\n  {\"id\":6,\"type\":\"timeseries\",\"title\":\"RPC errors per second\",\"datasource\":{\"type\":\"prometheus\",\"uid\":\"core5g-prometheus\"},\"gridPos\":{\"x\":12,\"y\":5,\"w\":12,\"h\":8},\"targets\":[{\"expr\":\"sum by (service,code) (rate(core5g_rpc_requests_total{code!=\\\"OK\\\"}[1m]))\",\"legendFormat\":\"{{service}} {{code}}\",\"refId\":\"A\"}]},\n  {\"id\":7,\"type\":\"timeseries\",\"title\":\"Virtual packet outcomes\",\"datasource\":{\"type\":\"prometheus\",\"uid\":\"core5g-prometheus\"},\"gridPos\":{\"x\":0,\"y\":13,\"w\":12,\"h\":8},\"targets\":[{\"expr\":\"rate(core5g_packets_total[1m])\",\"legendFormat\":\"{{result}}\",\"refId\":\"A\"}]},\n  {\"id\":8,\"type\":\"timeseries\",\"title\":\"Scrape availability\",\"datasource\":{\"type\":\"prometheus\",\"uid\":\"core5g-prometheus\"},\"gridPos\":{\"x\":12,\"y\":13,\"w\":12,\"h\":8},\"targets\":[{\"expr\":\"up{job=\\\"core5g\\\"}\",\"legendFormat\":\"{{instance}}\",\"refId\":\"A\"}]}\n ]\n}\n"
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": {
+        "name": "grafana",
+        "namespace": "core5g"
+      },
+      "spec": {
+        "replicas": 1,
+        "strategy": {
+          "type": "Recreate"
+        },
+        "selector": {
+          "matchLabels": {
+            "app": "grafana"
+          }
+        },
+        "template": {
+          "metadata": {
+            "labels": {
+              "app": "grafana"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "grafana",
+                "image": "grafana/grafana:11.6.0",
+                "ports": [
+                  {
+                    "containerPort": 3000
+                  }
+                ],
+                "env": [
+                  {
+                    "name": "GF_AUTH_ANONYMOUS_ENABLED",
+                    "value": "true"
+                  },
+                  {
+                    "name": "GF_AUTH_ANONYMOUS_ORG_ROLE",
+                    "value": "Viewer"
+                  },
+                  {
+                    "name": "GF_SECURITY_ADMIN_PASSWORD",
+                    "value": "local-lab-grafana"
+                  }
+                ],
+                "volumeMounts": [
+                  {
+                    "name": "config",
+                    "mountPath": "/etc/grafana/provisioning/datasources/prometheus.yml",
+                    "subPath": "datasource.yml"
+                  },
+                  {
+                    "name": "config",
+                    "mountPath": "/etc/grafana/provisioning/dashboards/provider.yml",
+                    "subPath": "provider.yml"
+                  },
+                  {
+                    "name": "config",
+                    "mountPath": "/etc/grafana/provisioning/dashboards/core5g.json",
+                    "subPath": "core5g.json"
+                  }
+                ]
+              }
+            ],
+            "volumes": [
+              {
+                "name": "config",
+                "configMap": {
+                  "name": "grafana-config"
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "name": "grafana",
+        "namespace": "core5g"
+      },
+      "spec": {
+        "selector": {
+          "app": "grafana"
+        },
+        "ports": [
+          {
+            "name": "http",
+            "port": 3000,
+            "targetPort": 3000,
+            "nodePort": 30030
+          }
+        ],
+        "type": "NodePort"
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": {
+        "name": "jaeger",
+        "namespace": "core5g"
+      },
+      "spec": {
+        "replicas": 1,
+        "strategy": {
+          "type": "Recreate"
+        },
+        "selector": {
+          "matchLabels": {
+            "app": "jaeger"
+          }
+        },
+        "template": {
+          "metadata": {
+            "labels": {
+              "app": "jaeger"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "jaeger",
+                "image": "jaegertracing/all-in-one:1.66.0",
+                "env": [
+                  {
+                    "name": "COLLECTOR_OTLP_ENABLED",
+                    "value": "true"
+                  }
+                ],
+                "ports": [
+                  {
+                    "containerPort": 16686
+                  },
+                  {
+                    "containerPort": 4317
+                  },
+                  {
+                    "containerPort": 4318
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "name": "jaeger",
+        "namespace": "core5g"
+      },
+      "spec": {
+        "selector": {
+          "app": "jaeger"
+        },
+        "ports": [
+          {
+            "name": "http",
+            "port": 16686,
+            "targetPort": 16686,
+            "nodePort": 30686
+          },
+          {
+            "name": "otlp",
+            "port": 4318,
+            "targetPort": 4318
+          },
+          {
+            "name": "otlp-grpc",
+            "port": 4317,
+            "targetPort": 4317
+          }
+        ],
+        "type": "NodePort"
+      }
+    }
+  ]
+}

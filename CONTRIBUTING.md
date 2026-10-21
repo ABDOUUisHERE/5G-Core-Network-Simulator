@@ -12,4 +12,6 @@ Core5G is a portfolio engineering project: small, reviewable changes and reprodu
 
 Review checks: state transitions, dependency failures, cancellation, idempotency, data ownership, concurrent access, input validation and useful observability.
 
+For the initial stacked delivery, review PRs #14 -> #15 -> #16 -> #17 -> #18. Merge the first into `main`, then retarget the next PR to `main` before merging it; repeat in order. Do not merge a child into a retained feature base and assume it has reached `main`. No PR is merged automatically by the project tooling.
+
 Only synthetic subscriber identities and demonstration credentials belong in this repository. The control interface is intended for a trusted local lab.

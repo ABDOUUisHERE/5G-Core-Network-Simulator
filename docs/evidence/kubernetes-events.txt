@@ -1,0 +1,85 @@
+LAST SEEN   TYPE      REASON                  OBJECT                                MESSAGE
+61s         Normal    ScalingReplicaSet       deployment/gnb-simulator              Scaled up replica set gnb-simulator-799cdf777 from 0 to 1
+61s         Normal    SuccessfulCreate        replicaset/ausf-6c85bdd56             Created pod: ausf-6c85bdd56-b9c6p
+61s         Normal    SuccessfulCreate        replicaset/upf-7d98854764             Created pod: upf-7d98854764-l5cbc
+61s         Normal    Scheduled               pod/upf-7d98854764-l5cbc              Successfully assigned core5g/upf-7d98854764-l5cbc to core5g-lab-control-plane
+61s         Normal    ScalingReplicaSet       deployment/udm                        Scaled up replica set udm-d7d6796cd from 0 to 1
+61s         Normal    SuccessfulCreate        replicaset/udm-d7d6796cd              Created pod: udm-d7d6796cd-vtz6s
+61s         Normal    SuccessfulCreate        replicaset/amf-6dc894df7d             Created pod: amf-6dc894df7d-gwhv6
+61s         Normal    ScalingReplicaSet       deployment/amf                        Scaled up replica set amf-6dc894df7d from 0 to 1
+61s         Normal    Scheduled               pod/ausf-6c85bdd56-b9c6p              Successfully assigned core5g/ausf-6c85bdd56-b9c6p to core5g-lab-control-plane
+61s         Normal    Provisioning            persistentvolumeclaim/postgres-data   External provisioner is provisioning volume for claim "core5g/postgres-data"
+61s         Normal    ExternalProvisioning    persistentvolumeclaim/postgres-data   Waiting for a volume to be created either by the external provisioner 'rancher.io/local-path' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+61s         Normal    WaitForFirstConsumer    persistentvolumeclaim/postgres-data   waiting for first consumer to be created before binding
+61s         Normal    ScalingReplicaSet       deployment/postgres                   Scaled up replica set postgres-6cc87b4fd4 from 0 to 1
+61s         Normal    ScalingReplicaSet       deployment/ausf                       Scaled up replica set ausf-6c85bdd56 from 0 to 1
+61s         Normal    Scheduled               pod/control-api-55b4c4bbf9-wfn2m      Successfully assigned core5g/control-api-55b4c4bbf9-wfn2m to core5g-lab-control-plane
+61s         Normal    SuccessfulCreate        replicaset/postgres-6cc87b4fd4        Created pod: postgres-6cc87b4fd4-lh58x
+61s         Normal    SuccessfulCreate        replicaset/gnb-simulator-799cdf777    Created pod: gnb-simulator-799cdf777-jv4v9
+61s         Normal    Scheduled               pod/amf-6dc894df7d-gwhv6              Successfully assigned core5g/amf-6dc894df7d-gwhv6 to core5g-lab-control-plane
+61s         Normal    Scheduled               pod/udm-d7d6796cd-vtz6s               Successfully assigned core5g/udm-d7d6796cd-vtz6s to core5g-lab-control-plane
+61s         Normal    SuccessfulCreate        replicaset/control-api-55b4c4bbf9     Created pod: control-api-55b4c4bbf9-wfn2m
+61s         Normal    ScalingReplicaSet       deployment/control-api                Scaled up replica set control-api-55b4c4bbf9 from 0 to 1
+61s         Normal    Scheduled               pod/gnb-simulator-799cdf777-jv4v9     Successfully assigned core5g/gnb-simulator-799cdf777-jv4v9 to core5g-lab-control-plane
+61s         Normal    Scheduled               pod/smf-7759fbb458-5smtf              Successfully assigned core5g/smf-7759fbb458-5smtf to core5g-lab-control-plane
+61s         Normal    SuccessfulCreate        replicaset/smf-7759fbb458             Created pod: smf-7759fbb458-5smtf
+61s         Normal    ScalingReplicaSet       deployment/upf                        Scaled up replica set upf-7d98854764 from 0 to 1
+61s         Normal    ScalingReplicaSet       deployment/smf                        Scaled up replica set smf-7759fbb458 from 0 to 1
+60s         Normal    Created                 pod/ausf-6c85bdd56-b9c6p              Container created
+60s         Normal    ScalingReplicaSet       deployment/grafana                    Scaled up replica set grafana-d6d64bb6c from 0 to 1
+60s         Normal    Pulled                  pod/ausf-6c85bdd56-b9c6p              Container image "core5g:local" already present on machine and can be accessed by the pod
+60s         Normal    ScalingReplicaSet       deployment/prometheus                 Scaled up replica set prometheus-864496cb45 from 0 to 1
+60s         Normal    Created                 pod/gnb-simulator-799cdf777-jv4v9     Container created
+60s         Normal    Pulled                  pod/gnb-simulator-799cdf777-jv4v9     Container image "core5g:local" already present on machine and can be accessed by the pod
+60s         Normal    SuccessfulCreate        replicaset/grafana-d6d64bb6c          Created pod: grafana-d6d64bb6c-6ndbn
+60s         Normal    Created                 pod/control-api-55b4c4bbf9-wfn2m      Container created
+60s         Normal    Scheduled               pod/jaeger-74d9f8f6c6-gcm5c           Successfully assigned core5g/jaeger-74d9f8f6c6-gcm5c to core5g-lab-control-plane
+60s         Normal    Pulling                 pod/jaeger-74d9f8f6c6-gcm5c           Pulling image "jaegertracing/all-in-one:1.66.0"
+60s         Normal    SuccessfulCreate        replicaset/jaeger-74d9f8f6c6          Created pod: jaeger-74d9f8f6c6-gcm5c
+60s         Normal    Pulled                  pod/control-api-55b4c4bbf9-wfn2m      Container image "core5g:local" already present on machine and can be accessed by the pod
+60s         Normal    Scheduled               pod/grafana-d6d64bb6c-6ndbn           Successfully assigned core5g/grafana-d6d64bb6c-6ndbn to core5g-lab-control-plane
+60s         Normal    Scheduled               pod/prometheus-864496cb45-bqggs       Successfully assigned core5g/prometheus-864496cb45-bqggs to core5g-lab-control-plane
+60s         Normal    SuccessfulCreate        replicaset/prometheus-864496cb45      Created pod: prometheus-864496cb45-bqggs
+60s         Normal    ScalingReplicaSet       deployment/jaeger                     Scaled up replica set jaeger-74d9f8f6c6 from 0 to 1
+59s         Normal    Started                 pod/ausf-6c85bdd56-b9c6p              Container started
+59s         Normal    Started                 pod/control-api-55b4c4bbf9-wfn2m      Container started
+59s         Normal    Pulling                 pod/prometheus-864496cb45-bqggs       Pulling image "prom/prometheus:v3.2.1"
+59s         Normal    Started                 pod/gnb-simulator-799cdf777-jv4v9     Container started
+59s         Normal    Pulling                 pod/grafana-d6d64bb6c-6ndbn           Pulling image "grafana/grafana:11.6.0"
+58s         Normal    Created                 pod/jaeger-74d9f8f6c6-gcm5c           Container created
+58s         Normal    Pulled                  pod/jaeger-74d9f8f6c6-gcm5c           Successfully pulled image "jaegertracing/all-in-one:1.66.0" in 1.697s (1.697s including waiting). Image size: 36294280 bytes.
+58s         Normal    Started                 pod/jaeger-74d9f8f6c6-gcm5c           Container started
+57s         Normal    ProvisioningSucceeded   persistentvolumeclaim/postgres-data   Successfully provisioned volume pvc-58a477ec-e047-4e87-8ca2-7deb59dde001
+56s         Normal    Scheduled               pod/postgres-6cc87b4fd4-lh58x         Successfully assigned core5g/postgres-6cc87b4fd4-lh58x to core5g-lab-control-plane
+55s         Normal    Pulling                 pod/postgres-6cc87b4fd4-lh58x         Pulling image "postgres:16-alpine"
+53s         Normal    Pulled                  pod/grafana-d6d64bb6c-6ndbn           Successfully pulled image "grafana/grafana:11.6.0" in 4.527s (5.958s including waiting). Image size: 181093645 bytes.
+53s         Normal    Started                 pod/grafana-d6d64bb6c-6ndbn           Container started
+53s         Normal    Created                 pod/grafana-d6d64bb6c-6ndbn           Container created
+51s         Normal    Started                 pod/prometheus-864496cb45-bqggs       Container started
+51s         Normal    Created                 pod/prometheus-864496cb45-bqggs       Container created
+51s         Normal    Pulled                  pod/prometheus-864496cb45-bqggs       Successfully pulled image "prom/prometheus:v3.2.1" in 2.725s (8.681s including waiting). Image size: 116785353 bytes.
+46s         Normal    Created                 pod/postgres-6cc87b4fd4-lh58x         Container created
+46s         Normal    Pulled                  pod/postgres-6cc87b4fd4-lh58x         Successfully pulled image "postgres:16-alpine" in 4.293s (8.996s including waiting). Image size: 116084812 bytes.
+46s         Normal    Started                 pod/postgres-6cc87b4fd4-lh58x         Container started
+45s         Warning   Unhealthy               pod/postgres-6cc87b4fd4-lh58x         Readiness probe failed: /var/run/postgresql:5432 - no response
+43s         Warning   Unhealthy               pod/udm-d7d6796cd-vtz6s               Startup probe failed: Get "http://10.244.0.5:8080/healthz": dial tcp 10.244.0.5:8080: connect: connection refused
+43s         Warning   Unhealthy               pod/amf-6dc894df7d-gwhv6              Startup probe failed: Get "http://10.244.0.6:8080/healthz": dial tcp 10.244.0.6:8080: connect: connection refused
+42s         Warning   Unhealthy               pod/upf-7d98854764-l5cbc              Startup probe failed: Get "http://10.244.0.9:8080/healthz": dial tcp 10.244.0.9:8080: connect: connection refused
+42s         Warning   Unhealthy               pod/smf-7759fbb458-5smtf              Startup probe failed: Get "http://10.244.0.8:8080/healthz": dial tcp 10.244.0.8:8080: connect: connection refused
+40s         Warning   BackOff                 pod/amf-6dc894df7d-gwhv6              Back-off restarting failed container amf in pod amf-6dc894df7d-gwhv6_core5g(a27b4afa-58d9-4a4a-b2c1-52cf0ba83813)
+40s         Warning   BackOff                 pod/udm-d7d6796cd-vtz6s               Back-off restarting failed container udm in pod udm-d7d6796cd-vtz6s_core5g(089213b8-3a0b-4099-8e64-36e1fab17c56)
+39s         Warning   BackOff                 pod/smf-7759fbb458-5smtf              Back-off restarting failed container smf in pod smf-7759fbb458-5smtf_core5g(0766cd13-4d68-41ee-b4e3-c45b365c8d41)
+39s         Warning   BackOff                 pod/upf-7d98854764-l5cbc              Back-off restarting failed container upf in pod upf-7d98854764-l5cbc_core5g(59bdb719-4e4f-40ac-ade9-2c58e1338258)
+27s         Normal    Pulled                  pod/upf-7d98854764-l5cbc              Container image "core5g:local" already present on machine and can be accessed by the pod
+27s         Normal    Created                 pod/upf-7d98854764-l5cbc              Container created
+27s         Normal    Started                 pod/upf-7d98854764-l5cbc              Container started
+26s         Normal    Pulled                  pod/udm-d7d6796cd-vtz6s               Container image "core5g:local" already present on machine and can be accessed by the pod
+26s         Normal    Created                 pod/udm-d7d6796cd-vtz6s               Container created
+26s         Normal    Started                 pod/udm-d7d6796cd-vtz6s               Container started
+24s         Normal    Started                 pod/amf-6dc894df7d-gwhv6              Container started
+24s         Normal    Created                 pod/amf-6dc894df7d-gwhv6              Container created
+24s         Normal    Pulled                  pod/amf-6dc894df7d-gwhv6              Container image "core5g:local" already present on machine and can be accessed by the pod
+23s         Normal    Started                 pod/smf-7759fbb458-5smtf              Container started
+23s         Normal    Created                 pod/smf-7759fbb458-5smtf              Container created
+23s         Normal    Pulled                  pod/smf-7759fbb458-5smtf              Container image "core5g:local" already present on machine and can be accessed by the pod
+11s         Warning   Unhealthy               pod/control-api-55b4c4bbf9-wfn2m      Readiness probe failed: HTTP probe failed with statuscode: 503
