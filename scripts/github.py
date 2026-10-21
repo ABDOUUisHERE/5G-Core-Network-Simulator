@@ -8,7 +8,7 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-REPOSITORY = "ABDOUUisHERE/stages-fullstack-challenge"
+REPOSITORY = "ABDOUUisHERE/core5g"
 
 
 def credentials():

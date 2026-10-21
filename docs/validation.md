@@ -12,11 +12,11 @@
 
 The following runs passed:
 
-- [Foundation](https://github.com/ABDOUUisHERE/stages-fullstack-challenge/actions/runs/39599184089)
-- [Registration](https://github.com/ABDOUUisHERE/stages-fullstack-challenge/actions/runs/39599743000)
-- [Sessions and routing](https://github.com/ABDOUUisHERE/stages-fullstack-challenge/actions/runs/39600242167)
-- [Complete Compose runtime, four browser widths and measured load](https://github.com/ABDOUUisHERE/stages-fullstack-challenge/actions/runs/39603433550)
-- [Go quality gate, Compose and real Kind cluster](https://github.com/ABDOUUisHERE/stages-fullstack-challenge/actions/runs/39603443408)
+- [Foundation](https://github.com/ABDOUUisHERE/core5g/actions/runs/39599184089)
+- [Registration](https://github.com/ABDOUUisHERE/core5g/actions/runs/39599743000)
+- [Sessions and routing](https://github.com/ABDOUUisHERE/core5g/actions/runs/39600242167)
+- [Complete Compose runtime, four browser widths and measured load](https://github.com/ABDOUUisHERE/core5g/actions/runs/39603433550)
+- [Go quality gate, Compose and real Kind cluster](https://github.com/ABDOUUisHERE/core5g/actions/runs/39603443408)
 
 Both Compose and Kind passed the six acceptance groups covering CDC T01-T09, including unknown/disabled/bad credentials, duplicate requests, unique IPs, released-session rejection, UPF compensation, registration timeout and a full background scenario. All eleven Kind pods were ready at capture time; stateful services retried startup while PostgreSQL initialized.
 
@@ -24,7 +24,7 @@ The first browser run found an assertion that checked drawer closure before the 
 
 Retained repository evidence: [coverage](evidence/coverage.json), [browser results](evidence/browser-results.json), [Kind pods](evidence/kubernetes-pods.txt), [Kind events](evidence/kubernetes-events.txt), [raw measured workload](evidence/performance-compose.json), and [desktop](evidence/dashboard-desktop.png)/[mobile](evidence/dashboard-mobile.png) captures of the real PostgreSQL-backed run.
 
-Explicit Prometheus, provisioned-Grafana and multi-service-Jaeger assertions passed in both Compose and Kind in [this validation run](https://github.com/ABDOUUisHERE/stages-fullstack-challenge/actions/runs/39604489154). They verified seven scraped services, eight provisioned Grafana panels and actual traces spanning multiple services. Retained checks: [Compose](evidence/observability-compose.json) and [Kind](evidence/observability-kind.json).
+Explicit Prometheus, provisioned-Grafana and multi-service-Jaeger assertions passed in both Compose and Kind in [this validation run](https://github.com/ABDOUUisHERE/core5g/actions/runs/39604489154). They verified seven scraped services, eight provisioned Grafana panels and actual traces spanning multiple services. Retained checks: [Compose](evidence/observability-compose.json) and [Kind](evidence/observability-kind.json).
 
 ## First measured workload
 
