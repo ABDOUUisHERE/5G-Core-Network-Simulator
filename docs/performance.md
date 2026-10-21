@@ -8,6 +8,8 @@ python tests/performance/load.py --count 1000 --concurrency 50 --iterations 3 --
 
 The script executes new registrations through HTTP -> gNB -> AMF -> AUSF -> UDM -> PostgreSQL. It records workload, count, worker concurrency, iterations, successful/all-request p50/p95/p99, error samples, throughput, wall time, CPU/OS/RAM, Docker resources and sampled container CPU/memory. Synthetic subscribers are reused; each UE and request UUID is new. Existing persisted records remain present and are documented as part of the environment.
 
+For the separate synchronized 1000-request experiment, run `go run ./tests/performance/burst --count 1000 --concurrency 1000`. All goroutines are released from one gate. The report records the observed peak of actual HTTP attempts, successes, failures, separate success/all-request percentiles and readiness after the load. It does not count waiting goroutines as in-flight requests. CI executes this immediately after the baseline on the same runner; `burst.json` is retained with the baseline environment/resource report.
+
 Raw reports belong in CI artifacts. Small reviewed summaries and selected raw reports can be retained under `docs/evidence`. Each report states its commit and whether the working tree was dirty. Screenshots are evidence of a real run, not a benchmark.
 
 ## Interpretation
